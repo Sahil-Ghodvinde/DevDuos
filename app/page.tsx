@@ -1,101 +1,893 @@
-import Image from "next/image";
+"use client"
+
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { hackathons } from "@/lib/data"
+import HackathonCard from "@/components/hackathon-card"
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
+import LoadingScreen from "@/components/loading-screen"
+
+interface ArtisticSlide {
+  type: 'artistic';
+  gradient: string;
+  pattern: "cyberpunk" | "geometric";
+  title: string;
+}
+
+interface ContentSlide {
+  type: 'content';
+  title: string;
+  description: string;
+  subtitle: string;
+  gradient: string;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [isLoading, setIsLoading] = useState(true)
+  const [displayedHackathons, setDisplayedHackathons] = useState(4)
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [slideDirection, setSlideDirection] = useState(1)
+  const itemsPerPage = 4
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    // Simulate loading time
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 2500)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const nextSlide = (currentSlide + 1) % 3
+      setSlideDirection(nextSlide > currentSlide ? 1 : -1)
+      setCurrentSlide(nextSlide)
+    }, 5000)
+
+    return () => clearInterval(timer)
+  }, [currentSlide])
+
+  const handleSlideChange = (index: number) => {
+    if (index !== currentSlide) {
+      setSlideDirection(index > currentSlide ? 1 : -1)
+      setCurrentSlide(index)
+    }
+  }
+
+  const handleSeeMore = () => {
+    const nextCount = Math.min(displayedHackathons + itemsPerPage, hackathons.length)
+    setDisplayedHackathons(nextCount)
+  }
+
+  if (isLoading) {
+    return <LoadingScreen />
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Navbar />
+
+      {/* Hero Section */}
+      <div className="w-full px-4">
+        <div className="mx-auto max-w-7xl">
+          <section className="w-full pt-8 pb-4">
+            <div 
+              className="bg-white/70 backdrop-blur-md shadow-lg rounded-3xl p-6 md:p-8 relative overflow-hidden"
+            >
+              {/* Split Content Container */}
+              <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                {/* Left Column */}
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div 
+                    key={`left-${currentSlide}`}
+                    className="rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+                             border border-white/40"
+                    initial={{ x: slideDirection > 0 ? '100%' : '-100%', opacity: 0 }}
+                    animate={{ x: '0%', opacity: 1 }}
+                    exit={{ x: slideDirection > 0 ? '-100%' : '100%', opacity: 0 }}
+                    transition={{ 
+                      type: "tween",
+                      duration: 0.5,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <AnimatedSlides 
+                      side="left" 
+                      currentSlide={currentSlide} 
+                    />
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Right Column */}
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={`right-${currentSlide}`}
+                    className="rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+                             border border-[#1e1894]/20"
+                    initial={{ x: slideDirection > 0 ? '100%' : '-100%', opacity: 0 }}
+                    animate={{ x: '0%', opacity: 1 }}
+                    exit={{ x: slideDirection > 0 ? '-100%' : '100%', opacity: 0 }}
+                    transition={{ 
+                      type: "tween",
+                      duration: 0.5,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <AnimatedSlides 
+                      side="right" 
+                      currentSlide={currentSlide} 
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Centralized Dot Navigator */}
+              <div className="flex justify-center gap-3 mt-8">
+                {[0, 1, 2].map((dot) => (
+                  <motion.button
+                    key={dot}
+                    className={`w-2.5 h-2.5 rounded-full cursor-pointer transition-all duration-300 ${
+                      currentSlide === dot 
+                        ? 'bg-[#1e1894] w-8' 
+                        : 'bg-[#1e1894]/20 hover:bg-[#1e1894]/40'
+                    }`}
+                    initial={false}
+                    animate={{ scale: currentSlide === dot ? 1 : 0.8 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={() => handleSlideChange(dot)}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      {/* Hackathon Listing Section */}
+      <div className="w-full px-4">
+        <div className="mx-auto max-w-7xl">
+          <section className="py-4">
+            <div className="bg-white/10 backdrop-blur-md shadow-lg rounded-3xl p-8">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-[#1e1894]">Upcoming Hackathons</h2>
+                <div className="relative min-w-[200px]">
+                  <select className="w-full bg-white/80 border-2 border-gray-200 rounded-xl px-4 py-2.5 pr-10 
+                                   appearance-none focus:outline-none focus:border-[#1e1894] focus:ring-2 focus:ring-[#1e1894]/20
+                                   transition-all duration-300">
+                    <option>Mode</option>
+                    <option>All</option>
+                    <option>Online</option>
+                    <option>Onsite</option>
+                    <option>Hybrid</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#1e1894]">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[400px]">
+                {hackathons.slice(0, displayedHackathons).map((hackathon, index) => (
+                  <motion.div
+                    key={hackathon.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
+                    <HackathonCard hackathon={hackathon} />
+                  </motion.div>
+                ))}
+              </div>
+
+              {displayedHackathons < hackathons.length && (
+                <div className="text-center mt-10">
+                  <motion.button
+                    onClick={handleSeeMore}
+                    className="px-6 py-2 bg-white/80 text-[#1e1894] rounded-full text-sm font-medium
+                             border border-[#1e1894]/20 shadow-sm
+                             hover:bg-[#1e1894]/5 transition-all duration-300"
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                  >
+                    Load More
+                  </motion.button>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* Team Finding Section */}
+      <div className="w-full px-4">
+        <div className="mx-auto max-w-7xl">
+          <section className="py-4">
+            <div className="bg-white/70 backdrop-blur-md shadow-lg rounded-3xl p-12">
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className="text-center"
+              >
+                <h2 className="text-3xl md:text-4xl font-bold text-[#1e1894] mb-6">
+                  Everything you need in one place
+                </h2>
+                <p className="text-gray-600 text-lg mb-12 max-w-2xl mx-auto">
+                  Experience a seamless platform designed to make your hackathon journey smoother and more collaborative.
+                </p>
+
+                <div className="max-w-5xl mx-auto h-[600px] bg-white 
+                              rounded-2xl flex items-center justify-between relative overflow-hidden px-8">
+                  {/* Left Side - Device Frame */}
+                  <div className="relative w-[300px] h-[600px] bg-[#1a1b1e] rounded-[3rem] shadow-xl border-[12px] border-[#2a2b2e]
+                               flex items-center justify-center overflow-hidden">
+                    {/* Device Header - Camera & Speaker */}
+                    <div className="absolute top-0 w-36 h-6 bg-[#2a2b2e] rounded-b-3xl flex items-center justify-center gap-2 z-20">
+                      <div className="w-2 h-2 rounded-full bg-[#1e1894]"></div>
+                      <div className="w-12 h-2 rounded-full bg-[#3a3b3e]"></div>
+                    </div>
+
+                    {/* Screen Content */}
+                    <div className="w-full h-full bg-white relative">
+                      {/* Status Bar */}
+                      <div className="h-7 bg-[#f8f9fa] flex items-center justify-between px-4 text-xs">
+                        <span>9:41</span>
+                        <div className="flex items-center gap-1">
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 20.9994C16.4183 20.9994 20 17.4177 20 12.9994C20 8.58107 16.4183 4.99939 12 4.99939C7.58172 4.99939 4 8.58107 4 12.9994C4 17.4177 7.58172 20.9994 12 20.9994Z"/>
+                          </svg>
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M15.5355 8.46447C17.4882 10.4171 17.4882 13.5829 15.5355 15.5355C13.5829 17.4882 10.4171 17.4882 8.46447 15.5355C6.51184 13.5829 6.51184 10.4171 8.46447 8.46447C10.4171 6.51184 13.5829 6.51184 15.5355 8.46447"/>
+                          </svg>
+                          <div className="w-6 bg-[#1e1894] h-2.5 rounded-full"></div>
+                        </div>
+                      </div>
+
+                      {/* Content Carousel */}
+                      <AnimatePresence mode="wait">
+                        <motion.div 
+                          key={currentSlide}
+                          initial={{ opacity: 0, x: 100 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -100 }}
+                          transition={{ duration: 0.5 }}
+                          className="p-4"
+                        >
+                          {currentSlide === 0 && (
+                            <div className="space-y-4">
+                              <div className="bg-[#f8f9fa] p-4 rounded-2xl">
+                                <h3 className="text-[#1e1894] font-semibold text-lg mb-2">Team Matching</h3>
+                                <div className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm">
+                                  <div className="w-12 h-12 bg-[#1e1894]/10 rounded-full flex items-center justify-center text-xl">
+                                    🎯
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="h-2 w-24 bg-[#1e1894] rounded-full"></div>
+                                    <div className="h-2 w-32 bg-gray-200 rounded-full mt-2"></div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-3">
+                                {['Frontend', 'Backend', 'UI/UX', 'DevOps'].map((skill, i) => (
+                                  <motion.div
+                                    key={skill}
+                                    className="bg-white p-3 rounded-xl shadow-sm"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.1 }}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-8 h-8 bg-[#1e1894]/10 rounded-full flex items-center justify-center">
+                                        {i === 0 ? '👩‍💻' : i === 1 ? '👨‍💻' : i === 2 ? '🎨' : '⚙️'}
+                                      </div>
+                                      <span className="text-sm font-medium">{skill}</span>
+                                    </div>
+                                    <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                      <motion.div
+                                        className="h-full bg-[#1e1894]"
+                                        initial={{ width: '0%' }}
+                                        animate={{ width: '100%' }}
+                                        transition={{ duration: 1.5, delay: i * 0.2 }}
+                                      />
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+
+                              <div className="bg-[#f8f9fa] p-4 rounded-2xl">
+                                <div className="flex items-center justify-between mb-3">
+                                  <h4 className="font-medium text-[#1e1894]">Match Score</h4>
+                                  <span className="text-sm text-gray-500">98%</span>
+                                </div>
+                                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                  <motion.div
+                                    className="h-full bg-[#1e1894]"
+                                    initial={{ width: '0%' }}
+                                    animate={{ width: '98%' }}
+                                    transition={{ duration: 1.5 }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {currentSlide === 1 && (
+                            <div className="space-y-4">
+                              <div className="bg-[#f8f9fa] p-4 rounded-2xl">
+                                <h3 className="text-[#1e1894] font-semibold text-lg mb-2">Hackathon Chat</h3>
+                                <div className="space-y-3">
+                                  {[
+                                    { user: "Alice", message: "Hey team! Ready to start?" },
+                                    { user: "Bob", message: "Yes! I have some ideas." },
+                                    { user: "Charlie", message: "Let's discuss the tech stack." }
+                                  ].map((chat, i) => (
+                                    <motion.div
+                                      key={i}
+                                      className={`flex items-start gap-3 ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: i * 0.2 }}
+                                    >
+                                      {i % 2 === 0 && (
+                                        <div className="w-8 h-8 bg-[#1e1894]/10 rounded-full flex items-center justify-center">
+                                          {chat.user[0]}
+                                        </div>
+                                      )}
+                                      <div className={`p-3 rounded-xl max-w-[70%] ${
+                                        i % 2 === 0 ? 'bg-white' : 'bg-[#1e1894] text-white'
+                                      }`}>
+                                        <p className="text-sm">{chat.message}</p>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="bg-white p-3 rounded-xl shadow-sm flex items-center gap-3">
+                                <input
+                                  type="text"
+                                  placeholder="Type a message..."
+                                  className="flex-1 bg-transparent text-sm focus:outline-none"
+                                />
+                                <button className="w-8 h-8 bg-[#1e1894] rounded-full flex items-center justify-center text-white">
+                                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7-7l7 7-7 7"/>
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {currentSlide === 2 && (
+                            <div className="space-y-4">
+                              {/* Analytics Header */}
+                              <div className="bg-[#f8f9fa] p-4 rounded-2xl">
+                                <h3 className="text-[#1e1894] font-semibold text-lg mb-4">Analytics Dashboard</h3>
+                                <div className="grid grid-cols-2 gap-3">
+                                  {[
+                                    { label: 'Active Users', value: '23.2K', icon: '👥' },
+                                    { label: 'Teams Formed', value: '5.2K', icon: '🤝' },
+                                    { label: 'Projects', value: '12.8K', icon: '💻' },
+                                    { label: 'Success Rate', value: '89%', icon: '📈' }
+                                  ].map((stat, i) => (
+                                    <motion.div
+                                      key={i}
+                                      className="bg-white p-3 rounded-xl shadow-sm"
+                                      initial={{ opacity: 0, scale: 0.8 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ delay: i * 0.1 }}
+                                    >
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <span className="text-xl">{stat.icon}</span>
+                                        <div className="h-6 w-[1px] bg-gray-200"></div>
+                                        <span className="text-lg font-semibold text-[#1e1894]">{stat.value}</span>
+                                      </div>
+                                      <div className="text-sm text-gray-600">{stat.label}</div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Growth Chart */}
+                              <div className="bg-[#f8f9fa] p-4 rounded-2xl">
+                                <div className="flex items-center justify-between mb-4">
+                                  <h4 className="font-medium text-[#1e1894]">Monthly Growth</h4>
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <span className="w-2 h-2 rounded-full bg-[#1e1894]"></span>
+                                    <span className="text-gray-600">2024</span>
+                                  </div>
+                                </div>
+                                <div className="h-32 flex items-end justify-between gap-2">
+                                  {[40, 65, 45, 80, 60, 90, 75].map((height, i) => (
+                                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                                      <motion.div
+                                        className="w-full bg-[#1e1894]/10 rounded-lg relative group"
+                                        initial={{ height: 0 }}
+                                        animate={{ height: `${height}%` }}
+                                        transition={{ duration: 1, delay: i * 0.1 }}
+                                      >
+                                        <motion.div
+                                          className="absolute bottom-0 left-0 right-0 bg-[#1e1894] rounded-lg"
+                                          initial={{ height: 0 }}
+                                          animate={{ height: `${height}%` }}
+                                          transition={{ duration: 1, delay: i * 0.1 }}
+                                        />
+                                        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 
+                                                      opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                          <span className="text-xs font-medium text-[#1e1894]">{height}%</span>
+                                        </div>
+                                      </motion.div>
+                                      <span className="text-xs text-gray-500">
+                                        {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'][i]}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Quick Stats */}
+                              <div className="bg-[#f8f9fa] p-4 rounded-2xl">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <h4 className="text-sm text-gray-600">Total Revenue</h4>
+                                    <p className="text-xl font-semibold text-[#1e1894] mt-1">$124.2K</p>
+                                  </div>
+                                  <motion.div
+                                    className="w-12 h-12 rounded-full bg-[#1e1894]/10 flex items-center justify-center"
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                  >
+                                    <svg className="w-6 h-6 text-[#1e1894]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                  </motion.div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </motion.div>
+                      </AnimatePresence>
+
+                      {/* Navigation Dots */}
+                      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                        {[0, 1, 2].map((dot) => (
+                          <motion.button
+                            key={dot}
+                            className={`w-2 h-2 rounded-full ${
+                              currentSlide === dot ? 'bg-[#1e1894]' : 'bg-gray-300'
+                            }`}
+                            onClick={() => handleSlideChange(dot)}
+                            whileHover={{ scale: 1.2 }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Side - Feature Descriptions */}
+                  <div className="w-[400px] space-y-8 py-8">
+                    <motion.div
+                      className={`p-6 rounded-2xl transition-all duration-300 cursor-pointer ${
+                        currentSlide === 0 
+                          ? 'bg-[#1e1894]/5 shadow-lg scale-105' 
+                          : 'bg-transparent hover:bg-gray-50'
+                      }`}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                      onClick={() => handleSlideChange(0)}
+                    >
+                      <h3 className="text-xl font-semibold text-[#1e1894] mb-2">Smart Team Matching</h3>
+                      <p className="text-gray-600">Our AI-powered algorithm connects you with the perfect teammates based on skills and goals.</p>
+                    </motion.div>
+
+                    <motion.div
+                      className={`p-6 rounded-2xl transition-all duration-300 cursor-pointer ${
+                        currentSlide === 1 
+                          ? 'bg-[#1e1894]/5 shadow-lg scale-105' 
+                          : 'bg-transparent hover:bg-gray-50'
+                      }`}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 }}
+                      onClick={() => handleSlideChange(1)}
+                    >
+                      <h3 className="text-xl font-semibold text-[#1e1894] mb-2">Dedicated Chat Rooms</h3>
+                      <p className="text-gray-600">Each hackathon gets its own space for participants to collaborate and share ideas.</p>
+                    </motion.div>
+
+                    <motion.div
+                      className={`p-6 rounded-2xl transition-all duration-300 cursor-pointer ${
+                        currentSlide === 2 
+                          ? 'bg-[#1e1894]/5 shadow-lg scale-105' 
+                          : 'bg-transparent hover:bg-gray-50'
+                      }`}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                      onClick={() => handleSlideChange(2)}
+                    >
+                      <h3 className="text-xl font-semibold text-[#1e1894] mb-2">Real-time Analytics</h3>
+                      <p className="text-gray-600">Track participation, team formation, and project progress with comprehensive analytics.</p>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* About Us Section */}
+      <section className="w-full py-16">
+        <div className="px-4">
+          <div className="mx-auto max-w-7xl">
+            <div className="bg-[#1e1894] rounded-3xl p-12 text-white relative overflow-hidden">
+              {/* Background Animation */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#1e1894] to-[#4361ee]">
+                <div className="absolute inset-0">
+                  {[...Array(20)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute w-2 h-2 rounded-full bg-white/10"
+                      style={{
+                        top: `${Math.random() * 100}%`,
+                        left: `${Math.random() * 100}%`,
+                      }}
+                      animate={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0.1, 0.3, 0.1],
+                      }}
+                      transition={{
+                        duration: 3 + Math.random() * 2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative z-10">
+                {/* Company Logo and Name */}
+                <motion.div 
+                  className="flex items-center justify-center gap-4 mb-12"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center">
+                    <span className="text-[#1e1894] text-2xl font-bold">DD</span>
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-3xl font-bold">DevDuos</h2>
+                    <p className="text-white/80">Founders-suite</p>
+                  </div>
+                </motion.div>
+
+                {/* Founder Cards */}
+                <div className="grid md:grid-cols-2 gap-8 mb-12">
+                  {[
+                    {
+                      name: "Sahil Gawli",
+                      role: "Founder, IT Engineer",
+                      emoji: "👨‍💻"
+                    },
+                    {
+                      name: "Sahil Ghodvinde",
+                      role: "Founder, IT Engineer",
+                      emoji: "👨‍💻"
+                    }
+                  ].map((founder, i) => (
+                    <motion.div
+                      key={i}
+                      className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20"
+                      initial={{ opacity: 0, x: i === 0 ? -20 : 20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: i * 0.2 }}
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-2xl">
+                          {founder.emoji}
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-semibold">{founder.name}</h3>
+                          <p className="text-white/80">{founder.role}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Story Timeline */}
+                <div className="space-y-8 max-w-3xl mx-auto">
+                  {[
+                    {
+                      date: "January 2024",
+                      title: "The Beginning",
+                      content: "Two engineering students faced a common challenge: finding the right teammates for hackathons. This sparked the idea for DevDuos.",
+                      icon: "💡"
+                    },
+                    {
+                      date: "February 2024",
+                      title: "Problem Discovery",
+                      content: "While building the platform, we uncovered another challenge - participants needed a dedicated space for discussions and collaboration.",
+                      icon: "🔍"
+                    },
+                    {
+                      date: "March 2024",
+                      title: "DevDuos Spaces Launch",
+                      content: "Launched our community-driven forum where innovators can connect, collaborate, and seek guidance.",
+                      icon: "🚀"
+                    }
+                  ].map((milestone, i) => (
+                    <motion.div
+                      key={i}
+                      className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">
+                          {milestone.icon}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold">{milestone.title}</h3>
+                            <div className="h-1 w-1 rounded-full bg-white/40"></div>
+                            <span className="text-white/60 text-sm">{milestone.date}</span>
+                          </div>
+                          <p className="text-white/80 leading-relaxed">{milestone.content}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Contact Button */}
+                <div className="mt-12 text-center">
+                  <motion.button 
+                    className="px-8 py-3 bg-white text-[#1e1894] rounded-full font-medium 
+                             hover:bg-gray-50 transition-all duration-300
+                             shadow-lg hover:shadow-xl"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Connect with us
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
-  );
+  )
 }
+
+function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", currentSlide: number }) {
+  const slides: {
+    left: ArtisticSlide[];
+    right: ContentSlide[];
+  } = {
+    left: [
+      {
+        type: 'artistic',
+        gradient: "from-[#FF0080] via-[#7928CA] to-[#FF0080]",
+        pattern: "cyberpunk",
+        title: "All Hackathons at one place"
+      },
+      {
+        type: 'artistic',
+        gradient: "from-[#00F5A0] via-[#00D9F5] to-[#00F5A0]",
+        pattern: "geometric",
+        title: "Hackathon specific Chatrooms"
+      },
+      {
+        type: 'artistic',
+        gradient: "from-[#1e1894] via-[#4361ee] to-[#1e1894]",
+        pattern: "geometric",
+        title: "Real-time Analytics"
+      }
+    ],
+    right: [
+      {
+        type: 'content',
+        title: "Find your teammates here",
+        description: "Connect with talented developers and form your dream team",
+        subtitle: "Team Building",
+        gradient: "from-[#1e1894] via-[#1e1894] to-[#1e1894]"
+      },
+      {
+        type: 'content',
+        title: "Get the statistics here",
+        description: "Track your progress and see your impact in real-time",
+        subtitle: "Analytics & Insights",
+        gradient: "from-[#1e1894] via-[#1e1894] to-[#1e1894]"
+      },
+      {
+        type: 'content',
+        title: "Data-Driven Decisions",
+        description: "Make informed decisions with comprehensive analytics and insights",
+        subtitle: "Analytics Dashboard",
+        gradient: "from-[#1e1894] via-[#1e1894] to-[#1e1894]"
+      }
+    ]
+  }
+
+  const currentContent = slides[side][currentSlide]
+
+  if (side === "left") {
+    const content = currentContent as ArtisticSlide
+    return (
+      <div className="h-full relative overflow-hidden bg-black">
+        {/* Artistic Background Patterns */}
+        {content.pattern === "cyberpunk" ? (
+          <div className="absolute inset-0">
+            {/* Static Neon Grid */}
+            <div className="absolute inset-0 grid grid-cols-6 grid-rows-6">
+              {[...Array(36)].map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-full h-full border-2 ${
+                    i % 2 ? 'border-[#FF0080]/20' : 'border-[#7928CA]/20'
+                  }`}
+                />
+              ))}
+            </div>
+            
+            {/* Static Neon Elements */}
+            <div className="absolute inset-0">
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={`neon-${i}`}
+                  className={`absolute w-32 h-32 bg-gradient-to-r ${content.gradient}`}
+                  style={{
+                    left: `${(i * 25) % 100}%`,
+                    top: `${(i * 30) % 100}%`,
+                    filter: 'blur(40px)',
+                    mixBlendMode: 'screen',
+                    opacity: 0.4,
+                    transform: `rotate(${i * 45}deg)`,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Static Glitch Lines */}
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={`glitch-${i}`}
+                className="absolute h-px w-full bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                style={{ 
+                  top: `${20 * i}%`,
+                  opacity: 0.3,
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="absolute inset-0">
+            {/* Static Geometric Patterns */}
+            <div className="absolute inset-0 grid grid-cols-8 grid-rows-8">
+              {[...Array(64)].map((_, i) => (
+                <div
+                  key={i}
+                  className="relative"
+                >
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${content.gradient}
+                               ${i % 2 ? 'rounded-full' : 'rotate-45'}`}
+                    style={{
+                      opacity: 0.2,
+                      transform: `scale(${0.8 + (i % 3) * 0.1}) rotate(${i * 15}deg)`,
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Overlay Gradient */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${content.gradient} opacity-30 mix-blend-overlay`} />
+
+        {/* Title */}
+        <div className="relative z-10 h-full flex items-center justify-center p-8">
+          <motion.h2
+            className="text-5xl font-bold text-white text-center"
+            style={{ 
+              fontFamily: 'Space Grotesk, sans-serif',
+              letterSpacing: '-0.02em',
+              textShadow: '0 0 30px rgba(255,255,255,0.5)',
+            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            {content.title}
+          </motion.h2>
+        </div>
+      </div>
+    )
+  }
+
+  const content = currentContent as ContentSlide
+  return (
+    <div className="h-full flex flex-col justify-between p-8 relative overflow-hidden bg-white">
+      <div className="relative z-10 space-y-6">
+        <div className="space-y-3">
+          <motion.span 
+            className="uppercase text-xs font-medium tracking-[0.2em] block text-[#1e1894]"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            {content.subtitle}
+          </motion.span>
+          <motion.h2
+            className="text-3xl font-bold text-[#1e1894] mb-4"
+            style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            {content.title}
+          </motion.h2>
+          <motion.p
+            className="text-lg leading-relaxed text-gray-600"
+            style={{ fontFamily: 'DM Sans, sans-serif' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            {content.description}
+          </motion.p>
+        </div>
+      </div>
+
+      <motion.button
+        className="group w-full px-6 py-3 rounded-xl font-medium text-sm
+                   bg-[#1e1894] text-white hover:bg-[#1e1894]/90
+                   transition-all duration-300"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        style={{ fontFamily: 'Space Grotesk, sans-serif' }}
+      >
+        <span className="relative z-10 flex items-center justify-center gap-2">
+          Explore Now
+          <motion.svg 
+            className="w-4 h-4" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+            initial={{ x: 0 }}
+            animate={{ x: [0, 5, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                  d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </motion.svg>
+        </span>
+      </motion.button>
+    </div>
+  )
+}
+

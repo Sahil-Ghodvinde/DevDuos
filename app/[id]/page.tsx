@@ -1,0 +1,512 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useParams, useRouter } from "next/navigation"
+import Link from "next/link"
+import { motion } from "framer-motion"
+import { hackathons } from "@/lib/data"
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
+
+interface Hackathon {
+  id: string
+  title: string
+  description: string
+  image: string
+  location: string
+  date: string
+  closes: string
+  organizer?: string
+  mode?: "Online" | "Offline" | "Hybrid"
+  category?: string
+  timeline?: {
+    start: string
+    end: string
+    registration_deadline: string
+    key_dates: Array<{ date: string; event: string }>
+  }
+  overview?: string
+  eligibility?: string[]
+  requirements?: string[]
+  tracks?: Array<{ name: string; description: string }>
+  judges?: Array<{ name: string; role: string; image?: string }>
+  judging_criteria?: string[]
+  prizes?: {
+    total_pool: string
+    breakdown: Array<{ position: string; amount: string; sponsor?: string }>
+  }
+  rules?: string[]
+  additional_info?: string
+}
+
+export default function HackathonDetail() {
+  const params = useParams()
+  const router = useRouter()
+  const [hackathon, setHackathon] = useState<Hackathon | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    if (params.id) {
+      const found = hackathons.find((h) => h.id === params.id)
+      if (found) {
+        setHackathon(found as Hackathon)
+      }
+      setIsLoading(false)
+    }
+  }, [params.id])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <motion.div 
+          className="w-16 h-16 relative"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        >
+          <div className="absolute inset-0 border-4 border-[#1e1894]/20 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-[#1e1894] rounded-full border-t-transparent animate-spin"></div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  if (!hackathon) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          <h1 className="text-3xl font-bold mb-4 text-[#1e1894]">Hackathon not found</h1>
+          <Link href="/">
+            <motion.button
+              className="px-8 py-3 bg-[#1e1894] text-white rounded-full font-medium
+                       hover:bg-[#1e1894]/90 transition-all duration-300
+                       shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Return to home
+            </motion.button>
+          </Link>
+        </motion.div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Navbar />
+
+      <div className="w-full px-4 py-8">
+        <div className="mx-auto max-w-7xl">
+          {/* Back Button */}
+          <motion.button
+            onClick={() => router.back()}
+            className="mb-6 px-6 py-2.5 bg-white/70 backdrop-blur-md text-[#1e1894] rounded-full font-medium
+                     hover:bg-[#1e1894] hover:text-white transition-all duration-300 group
+                     shadow-lg shadow-[#1e1894]/10 hover:shadow-xl hover:shadow-[#1e1894]/20
+                     flex items-center gap-2"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <svg 
+              className="w-5 h-5 transform transition-transform group-hover:-translate-x-1" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Hackathons
+          </motion.button>
+
+          {/* Header Section */}
+          <motion.div
+            className="bg-white/70 backdrop-blur-md shadow-lg rounded-3xl overflow-hidden mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="relative h-48 bg-gradient-to-br from-[#1e1894] to-[#4361ee] overflow-hidden">
+              <div className="absolute inset-0">
+                {[...Array(20)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-2 h-2 rounded-full bg-white/10"
+                    style={{
+                      top: `${Math.random() * 100}%`,
+                      left: `${Math.random() * 100}%`,
+                    }}
+                    animate={{
+                      scale: [1, 1.5, 1],
+                      opacity: [0.1, 0.3, 0.1],
+                    }}
+                    transition={{
+                      duration: 3 + Math.random() * 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-2xl 
+                              flex items-center justify-center text-4xl">
+                  {hackathon?.image}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8">
+              <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className="flex-1">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    <h1 className="text-4xl font-bold text-gray-900 mb-4">{hackathon?.title}</h1>
+                    <div className="flex flex-wrap gap-3 mb-6">
+                      <span className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-medium">
+                        {hackathon?.mode || "Online"}
+                      </span>
+                      <span className="px-4 py-2 bg-purple-50 text-purple-600 rounded-xl font-medium">
+                        {hackathon?.category || "Hackathon"}
+                      </span>
+                      <span className="px-4 py-2 bg-[#1e1894] text-white rounded-xl">
+                        {hackathon?.location}
+                      </span>
+                    </div>
+                  </motion.div>
+                </div>
+
+                <motion.div
+                  className="flex flex-col sm:flex-row gap-4"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  <button className="px-6 py-3 bg-[#1e1894] text-white rounded-xl font-medium
+                                   hover:bg-[#1e1894]/90 transition-all duration-300
+                                   shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
+                                   flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                            d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                    </svg>
+                    Find Teammate
+                  </button>
+                  <button className="px-6 py-3 bg-[#1e1894] text-white rounded-xl font-medium
+                                   hover:bg-[#1e1894]/90 transition-all duration-300
+                                   shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
+                                   flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                            d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                    </svg>
+                    Apply Now
+                  </button>
+                  <button className="px-6 py-3 bg-white border-2 border-[#1e1894] text-[#1e1894] rounded-xl 
+                                   font-medium hover:bg-[#1e1894] hover:text-white transition-all duration-300
+                                   shadow-lg shadow-[#1e1894]/10 hover:shadow-xl hover:shadow-[#1e1894]/20
+                                   flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    Share
+                  </button>
+
+                  
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Main Content */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Overview Section */}
+              <motion.section
+                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Overview</h2>
+                <div className="prose max-w-none text-gray-600">
+                  <p className="text-lg leading-relaxed">
+                    {hackathon?.description}
+                  </p>
+                </div>
+              </motion.section>
+
+              {/* Timeline Section */}
+              <motion.section
+                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Timeline</h2>
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="flex-1 p-6 bg-blue-50 rounded-2xl">
+                      <div className="text-blue-600 font-medium mb-2">Start Date</div>
+                      <div className="text-xl font-semibold text-gray-900">{hackathon?.date}</div>
+                    </div>
+                    <div className="flex-1 p-6 bg-purple-50 rounded-2xl">
+                      <div className="text-purple-600 font-medium mb-2">Registration Closes</div>
+                      <div className="text-xl font-semibold text-gray-900">{hackathon?.closes}</div>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                    {[
+                      { date: "Phase 1", title: "Team Formation & Ideation" },
+                      { date: "Phase 2", title: "Development & Mentorship" },
+                      { date: "Phase 3", title: "Submission & Judging" }
+                    ].map((phase, i) => (
+                      <motion.div
+                        key={i}
+                        className="relative pl-12 pb-8"
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                        viewport={{ once: true }}
+                      >
+                        <div className="absolute left-2 top-2 w-4 h-4 rounded-full bg-[#1e1894]"></div>
+                        <div className="text-sm text-gray-500 mb-1">{phase.date}</div>
+                        <div className="font-medium text-gray-900">{phase.title}</div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </motion.section>
+
+              {/* Tracks Section */}
+              <motion.section
+                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Tracks</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[
+                    { icon: "💻", title: "Web3 & Blockchain", desc: "Build decentralized solutions" },
+                    { icon: "🤖", title: "AI & ML", desc: "Develop intelligent applications" },
+                    { icon: "🌐", title: "Open Innovation", desc: "Create impactful solutions" },
+                    { icon: "🎮", title: "Gaming", desc: "Design immersive experiences" }
+                  ].map((track, i) => (
+                    <motion.div
+                      key={i}
+                      className="p-6 bg-gray-50 rounded-2xl"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      viewport={{ once: true }}
+                    >
+                      <div className="text-3xl mb-4">{track.icon}</div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{track.title}</h3>
+                      <p className="text-gray-600">{track.desc}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.section>
+
+              {/* Prizes Section */}
+              <motion.section
+                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg overflow-hidden relative"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#1e1894] to-[#4361ee]"></div>
+                <div className="relative z-10">
+                  <h2 className="text-2xl font-bold text-white mb-8">Prizes & Rewards</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {[
+                      { position: "1st", prize: "$5,000", icon: "🏆" },
+                      { position: "2nd", prize: "$3,000", icon: "🥈" },
+                      { position: "3rd", prize: "$2,000", icon: "🥉" }
+                    ].map((prize, i) => (
+                      <motion.div
+                        key={i}
+                        className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center
+                                 border border-white/20"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                        viewport={{ once: true }}
+                      >
+                        <div className="text-4xl mb-4">{prize.icon}</div>
+                        <div className="text-white/80 mb-2">{prize.position} Place</div>
+                        <div className="text-2xl font-bold text-white">{prize.prize}</div>
+                      </motion.div>
+                    ))}
+                  </div>
+                  <div className="mt-8 p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+                    <h3 className="text-lg font-semibold text-white mb-4">Additional Rewards</h3>
+                    <ul className="space-y-3 text-white/80">
+                      <li className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Certificates of Participation
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Mentorship Opportunities
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Swag Kits for Top Teams
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </motion.section>
+            </div>
+
+            {/* Right Column - Sidebar */}
+            <div className="space-y-8">
+              {/* Quick Info Card */}
+              <motion.section
+                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Info</h2>
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500 mb-1">Duration</div>
+                      <div className="font-medium text-gray-900">48 Hours</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500 mb-1">Team Size</div>
+                      <div className="font-medium text-gray-900">2-4 Members</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500 mb-1">Eligibility</div>
+                      <div className="font-medium text-gray-900">Open for All</div>
+                    </div>
+                  </div>
+                </div>
+              </motion.section>
+
+              {/* Rules Section */}
+              <motion.section
+                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Rules</h2>
+                <ul className="space-y-4">
+                  {[
+                    "All code must be written during the hackathon",
+                    "Use of open source libraries is allowed",
+                    "Teams must submit a working prototype",
+                    "Respect intellectual property rights"
+                  ].map((rule, i) => (
+                    <motion.li
+                      key={i}
+                      className="flex items-start gap-3"
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      viewport={{ once: true }}
+                    >
+                      <svg className="w-5 h-5 text-[#1e1894] mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-gray-600">{rule}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.section>
+
+              {/* Contact Section */}
+              <motion.section
+                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Need Help?</h2>
+                <div className="space-y-4">
+                  <button className="w-full px-6 py-3 bg-[#1e1894] text-white rounded-xl font-medium
+                                   hover:bg-[#1e1894]/90 transition-all duration-300
+                                   shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
+                                   flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    Join Discord
+                  </button>
+                  <button className="w-full px-6 py-3 bg-white border-2 border-[#1e1894] text-[#1e1894] rounded-xl 
+                                   font-medium hover:bg-[#1e1894] hover:text-white transition-all duration-300
+                                   shadow-lg shadow-[#1e1894]/10 hover:shadow-xl hover:shadow-[#1e1894]/20
+                                   flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Contact Support
+                  </button>
+                </div>
+              </motion.section>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  )
+} 
