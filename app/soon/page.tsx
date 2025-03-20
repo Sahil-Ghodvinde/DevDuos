@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
@@ -11,6 +12,14 @@ const particles = Array.from({ length: 12 }, (_, i) => ({
 }))
 
 export default function ComingSoon() {
+  const [mounted, setMounted] = useState(false)
+  const [windowSize, setWindowSize] = useState({ width: 1000, height: 800 })
+
+  useEffect(() => {
+    setMounted(true)
+    setWindowSize({ width: window.innerWidth, height: window.innerHeight })
+  }, [])
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50 overflow-hidden">
       <Navbar />
@@ -18,19 +27,19 @@ export default function ComingSoon() {
       <main className="flex-1 flex items-center justify-center px-4 relative">
         {/* Background Particles */}
         <div className="absolute inset-0 overflow-hidden">
-          {Array.from({ length: 20 }).map((_, i) => (
+          {mounted && Array.from({ length: 20 }).map((_, i) => (
             <motion.div
               key={i}
               className="absolute w-2 h-2 bg-[#1e1894]/10 rounded-full"
               initial={{
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
+                x: Math.random() * windowSize.width,
+                y: Math.random() * windowSize.height,
                 scale: 0,
                 opacity: 0,
               }}
               animate={{
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
+                x: Math.random() * windowSize.width,
+                y: Math.random() * windowSize.height,
                 scale: [0, 1, 0],
                 opacity: [0, 0.5, 0],
               }}
