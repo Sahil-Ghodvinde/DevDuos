@@ -4,7 +4,7 @@ export const hackathons = [
     title: "Code for Change",
     description:
       "Code for Change 2025 is a thrilling hackathon organized by NSIM Knowledge Campus, Durgapur and the Open Source Student Development Club.",
-    image: "img1",
+    image: "https://ingenioushackathon.devfolio.co/_next/image?url=https%3A%2F%2Fassets.devfolio.co%2Fhackathons%2F866e1d0ec0974e4e83a6bde64e2fb15f%2Fassets%2Fcover%2F23.jpeg&w=1440&q=100",
     location: "Online",
     date: "Mar 15 - 17, 2025",
     closes: "closes on 14 Mar 2025",
@@ -14,7 +14,7 @@ export const hackathons = [
     title: "Code With DCG",
     description:
       "Code With DCG isn't just a hackathon—it's a 24-hour adrenaline rush of coding, creativity, and problem-solving, brought to you by Geek Room & DCG at Delhi Technological University.",
-    image: "img2",
+    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     location: "New Delhi",
     date: "Mar 16 - 18, 2025",
     closes: "closes on 14 Mar 2025",
@@ -24,7 +24,7 @@ export const hackathons = [
     title: "Hack the Future",
     description:
       "Join us for a weekend of innovation and collaboration as we tackle challenges related to sustainability and climate tech.",
-    image: "img3",
+    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     location: "Online",
     date: "Apr 5 - 7, 2025",
     closes: "closes on 1 Apr 2025",
@@ -33,7 +33,7 @@ export const hackathons = [
     id: "ai-summit-hackathon",
     title: "AI Summit Hackathon",
     description: "Build cutting-edge AI solutions to real-world problems in healthcare, finance, and education.",
-    image: "img4",
+    image: "https://images.unsplash.com/photo-1573496546038-82f9c39f6365?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
     location: "San Francisco",
     date: "Apr 12 - 14, 2025",
     closes: "closes on 5 Apr 2025",
@@ -43,7 +43,7 @@ export const hackathons = [
     title: "Blockchain Builders",
     description:
       "Create decentralized applications that leverage blockchain technology to solve trust and transparency issues.",
-    image: "img5",
+    image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     location: "Online",
     date: "Apr 19 - 21, 2025",
     closes: "closes on 15 Apr 2025",
@@ -52,7 +52,7 @@ export const hackathons = [
     id: "game-dev-jam",
     title: "Game Dev Jam",
     description: "Design and develop innovative games using the latest technologies in just 48 hours.",
-    image: "img6",
+    image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1171&q=80",
     location: "London",
     date: "May 3 - 5, 2025",
     closes: "closes on 25 Apr 2025",
@@ -61,20 +61,17 @@ export const hackathons = [
     id: "health-tech-hackathon",
     title: "Health Tech Hackathon",
     description: "Build solutions that improve healthcare accessibility, patient outcomes, and medical research.",
-    image: "img7",
+    image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1165&q=80",
     location: "Boston",
     date: "May 10 - 12, 2025",
     closes: "closes on 3 May 2025",
-
-    
   },
-
   {
     id: "blockchain-builders1",
     title: "Blockchain Builders",
     description:
       "Create decentralized applications that leverage blockchain technology to solve trust and transparency issues.",
-    image: "img5",
+    image: "https://images.unsplash.com/photo-1535378917042-10a22c95931a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1161&q=80",
     location: "Online",
     date: "Apr 19 - 21, 2025",
     closes: "closes on 15 Apr 2025",
@@ -83,7 +80,7 @@ export const hackathons = [
     id: "game-dev-jam1",
     title: "Game Dev Jam",
     description: "Design and develop innovative games using the latest technologies in just 48 hours.",
-    image: "img6",
+    image: "https://images.unsplash.com/photo-1508780709619-79562169bc64?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     location: "London",
     date: "May 3 - 5, 2025",
     closes: "closes on 25 Apr 2025",
@@ -92,11 +89,10 @@ export const hackathons = [
     id: "health-tech-hackathon1",
     title: "Health Tech Hackathon",
     description: "Build solutions that improve healthcare accessibility, patient outcomes, and medical research.",
-    image: "img7",
+    image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
     location: "Boston",
     date: "May 10 - 12, 2025",
     closes: "closes on 3 May 2025",
   },
-
 ]
 

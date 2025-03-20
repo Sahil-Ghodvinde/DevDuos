@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { hackathons } from "@/lib/data"
 import Navbar from "@/components/navbar"
@@ -97,7 +98,15 @@ export default function HackathonDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 relative">
+      {/* Grain Overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          filter: 'contrast(150%) brightness(150%)',
+        }} />
+      </div>
+
       <Navbar />
 
       <div className="w-full px-4 py-8">
@@ -130,32 +139,24 @@ export default function HackathonDetail() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="relative h-48 bg-gradient-to-br from-[#1e1894] to-[#4361ee] overflow-hidden">
-              <div className="absolute inset-0">
-                {[...Array(20)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-2 h-2 rounded-full bg-white/10"
-                    style={{
-                      top: `${Math.random() * 100}%`,
-                      left: `${Math.random() * 100}%`,
-                    }}
-                    animate={{
-                      scale: [1, 1.5, 1],
-                      opacity: [0.1, 0.3, 0.1],
-                    }}
-                    transition={{
-                      duration: 3 + Math.random() * 2,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
+            <div className="bg-white p-4 pt-6">
+              <div className="relative w-full mx-auto max-w-4xl" style={{ paddingTop: "30%" }}>
+                <div className="absolute inset-0 rounded-xl overflow-hidden">
+                  <Image 
+                    src={hackathon?.image || ""}
+                    alt={hackathon?.title || "Hackathon image"}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 800px"
+                    className="object-cover"
+                    priority
                   />
-                ))}
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-24 h-24 bg-white/10 backdrop-blur-md rounded-2xl 
-                              flex items-center justify-center text-4xl">
-                  {hackathon?.image}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-transparent"></div>
+                
+                  <div className="absolute bottom-4 left-4 z-10">
+                    <div className="px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-lg text-white inline-block">
+                      <span className="font-medium text-sm">{hackathon?.location}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -189,10 +190,12 @@ export default function HackathonDetail() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
                 >
-                  <button className="px-6 py-3 bg-[#1e1894] text-white rounded-xl font-medium
-                                   hover:bg-[#1e1894]/90 transition-all duration-300
-                                   shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
-                                   flex items-center justify-center gap-2">
+                  <button 
+                    onClick={() => router.push('/soon')}
+                    className="px-6 py-3 bg-[#1e1894] text-white rounded-xl font-medium
+                               hover:bg-[#1e1894]/90 transition-all duration-300
+                               shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
+                               flex items-center justify-center gap-2">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
                             d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />

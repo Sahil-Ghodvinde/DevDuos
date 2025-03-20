@@ -66,24 +66,32 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 relative">
+      {/* Paper Grain Overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.08] mix-blend-overlay">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          filter: 'contrast(200%) brightness(150%)',
+        }} />
+      </div>
+
       <Navbar />
 
       {/* Hero Section */}
-      <div className="w-full px-4">
+      <div className="w-full px-2 md:px-4">
         <div className="mx-auto max-w-7xl">
-          <section className="w-full pt-8 pb-4">
+          <section className="w-full pt-2 pb-2">
             <div 
-              className="bg-white/70 backdrop-blur-md shadow-lg rounded-3xl p-6 md:p-8 relative overflow-hidden"
+              className="bg-white/70 backdrop-blur-md shadow-lg rounded-2xl md:rounded-3xl p-2 md:p-4 relative overflow-hidden"
             >
               {/* Split Content Container */}
-              <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+              <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 items-stretch h-[160px] md:h-[240px]">
                 {/* Left Column */}
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div 
                     key={`left-${currentSlide}`}
-                    className="rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]
-                             border border-white/40"
+                    className="rounded-xl md:rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+                             border border-white/40 h-full"
                     initial={{ x: slideDirection > 0 ? '100%' : '-100%', opacity: 0 }}
                     animate={{ x: '0%', opacity: 1 }}
                     exit={{ x: slideDirection > 0 ? '-100%' : '100%', opacity: 0 }}
@@ -104,8 +112,8 @@ export default function Home() {
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div
                     key={`right-${currentSlide}`}
-                    className="rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]
-                             border border-[#1e1894]/20"
+                    className="rounded-xl md:rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+                             border border-[#1e1894]/20 h-full"
                     initial={{ x: slideDirection > 0 ? '100%' : '-100%', opacity: 0 }}
                     animate={{ x: '0%', opacity: 1 }}
                     exit={{ x: slideDirection > 0 ? '-100%' : '100%', opacity: 0 }}
@@ -124,13 +132,13 @@ export default function Home() {
               </div>
 
               {/* Centralized Dot Navigator */}
-              <div className="flex justify-center gap-3 mt-8">
+              <div className="flex justify-center gap-1 md:gap-2 mt-2 md:mt-4">
                 {[0, 1, 2].map((dot) => (
                   <motion.button
                     key={dot}
-                    className={`w-2.5 h-2.5 rounded-full cursor-pointer transition-all duration-300 ${
+                    className={`w-1.5 md:w-2 h-1.5 md:h-2 rounded-full cursor-pointer transition-all duration-300 ${
                       currentSlide === dot 
-                        ? 'bg-[#1e1894] w-8' 
+                        ? 'bg-[#1e1894] w-3 md:w-6' 
                         : 'bg-[#1e1894]/20 hover:bg-[#1e1894]/40'
                     }`}
                     initial={false}
@@ -146,25 +154,25 @@ export default function Home() {
       </div>
 
       {/* Hackathon Listing Section */}
-      <div className="w-full px-4">
+      <div className="w-full px-2 md:px-4">
         <div className="mx-auto max-w-7xl">
-          <section className="py-4">
-            <div className="bg-white/10 backdrop-blur-md shadow-lg rounded-3xl p-8">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#1e1894]">Upcoming Hackathons</h2>
-                <div className="relative min-w-[200px]">
-                  <select className="w-full bg-white/80 border-2 border-gray-200 rounded-xl px-4 py-2.5 pr-10 
+          <section className="py-2 md:py-4">
+            <div className="bg-white/60 backdrop-blur-md shadow-lg rounded-2xl md:rounded-3xl p-4 md:p-8">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4 mb-4 md:mb-8">
+                <h2 className="text-xl md:text-3xl font-bold text-[#1e1894]">Upcoming Hackathons</h2>
+                <div className="relative w-full md:w-auto min-w-[200px]">
+                  <select className="w-full bg-white/80 border-2 border-gray-200 rounded-xl px-3 md:px-4 py-2 md:py-2.5 pr-10 
                                    appearance-none focus:outline-none focus:border-[#1e1894] focus:ring-2 focus:ring-[#1e1894]/20
-                                   transition-all duration-300">
+                                   transition-all duration-300 text-sm md:text-base">
                     <option>Mode</option>
                     <option>All</option>
                     <option>Online</option>
-                    <option>Onsite</option>
+                    <option>Offline</option>
                     <option>Hybrid</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#1e1894]">
                     <svg
-                      className="w-5 h-5"
+                      className="w-4 h-4 md:w-5 md:h-5"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -176,7 +184,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[400px]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 min-h-[400px]">
                 {hackathons.slice(0, displayedHackathons).map((hackathon, index) => (
                   <motion.div
                     key={hackathon.id}
@@ -190,10 +198,10 @@ export default function Home() {
               </div>
 
               {displayedHackathons < hackathons.length && (
-                <div className="text-center mt-10">
+                <div className="text-center mt-6 md:mt-10">
                   <motion.button
                     onClick={handleSeeMore}
-                    className="px-6 py-2 bg-white/80 text-[#1e1894] rounded-full text-sm font-medium
+                    className="px-4 md:px-6 py-2 bg-white/80 text-[#1e1894] rounded-full text-sm font-medium
                              border border-[#1e1894]/20 shadow-sm
                              hover:bg-[#1e1894]/5 transition-all duration-300"
                     whileHover={{ scale: 1.01 }}
@@ -209,10 +217,10 @@ export default function Home() {
       </div>
 
       {/* Team Finding Section */}
-      <div className="w-full px-4">
+      <div className="w-full px-2 md:px-4">
         <div className="mx-auto max-w-7xl">
-          <section className="py-4">
-            <div className="bg-white/70 backdrop-blur-md shadow-lg rounded-3xl p-12">
+          <section className="py-2 md:py-4">
+            <div className="bg-white/70 backdrop-blur-md shadow-lg rounded-2xl md:rounded-3xl p-4 md:p-12">
               <motion.div
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
@@ -220,37 +228,40 @@ export default function Home() {
                 viewport={{ once: true }}
                 className="text-center"
               >
-                <h2 className="text-3xl md:text-4xl font-bold text-[#1e1894] mb-6">
+                <h2 className="text-xl md:text-4xl font-bold text-[#1e1894] mb-3 md:mb-6">
                   Everything you need in one place
                 </h2>
-                <p className="text-gray-600 text-lg mb-12 max-w-2xl mx-auto">
+                <p className="text-gray-600 text-sm md:text-lg mb-6 md:mb-12 max-w-2xl mx-auto px-2">
                   Experience a seamless platform designed to make your hackathon journey smoother and more collaborative.
                 </p>
 
-                <div className="max-w-5xl mx-auto h-[600px] bg-white 
-                              rounded-2xl flex items-center justify-between relative overflow-hidden px-8">
+                <div className="max-w-5xl mx-auto min-h-[400px] md:h-[600px] bg-white 
+                              rounded-xl md:rounded-2xl flex flex-col md:flex-row items-center md:items-start justify-between 
+                              relative overflow-hidden p-3 md:px-8 gap-6 md:gap-0">
                   {/* Left Side - Device Frame */}
-                  <div className="relative w-[300px] h-[600px] bg-[#1a1b1e] rounded-[3rem] shadow-xl border-[12px] border-[#2a2b2e]
+                  <div className="relative w-[240px] md:w-[300px] h-[480px] md:h-[600px] bg-[#1a1b1e] rounded-[2rem] md:rounded-[3rem] 
+                               shadow-xl border-[8px] md:border-[12px] border-[#2a2b2e]
                                flex items-center justify-center overflow-hidden">
                     {/* Device Header - Camera & Speaker */}
-                    <div className="absolute top-0 w-36 h-6 bg-[#2a2b2e] rounded-b-3xl flex items-center justify-center gap-2 z-20">
-                      <div className="w-2 h-2 rounded-full bg-[#1e1894]"></div>
-                      <div className="w-12 h-2 rounded-full bg-[#3a3b3e]"></div>
+                    <div className="absolute top-0 w-28 md:w-36 h-4 md:h-6 bg-[#2a2b2e] rounded-b-2xl md:rounded-b-3xl 
+                                 flex items-center justify-center gap-1 md:gap-2 z-20">
+                      <div className="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-[#1e1894]"></div>
+                      <div className="w-8 md:w-12 h-1.5 md:h-2 rounded-full bg-[#3a3b3e]"></div>
                     </div>
 
                     {/* Screen Content */}
                     <div className="w-full h-full bg-white relative">
                       {/* Status Bar */}
-                      <div className="h-7 bg-[#f8f9fa] flex items-center justify-between px-4 text-xs">
+                      <div className="h-5 md:h-7 bg-[#f8f9fa] flex items-center justify-between px-3 md:px-4 text-[10px] md:text-xs">
                         <span>9:41</span>
                         <div className="flex items-center gap-1">
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                          <svg className="w-3 h-3 md:w-4 md:h-4" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 20.9994C16.4183 20.9994 20 17.4177 20 12.9994C20 8.58107 16.4183 4.99939 12 4.99939C7.58172 4.99939 4 8.58107 4 12.9994C4 17.4177 7.58172 20.9994 12 20.9994Z"/>
                           </svg>
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                          <svg className="w-3 h-3 md:w-4 md:h-4" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M15.5355 8.46447C17.4882 10.4171 17.4882 13.5829 15.5355 15.5355C13.5829 17.4882 10.4171 17.4882 8.46447 15.5355C6.51184 13.5829 6.51184 10.4171 8.46447 8.46447C10.4171 6.51184 13.5829 6.51184 15.5355 8.46447"/>
                           </svg>
-                          <div className="w-6 bg-[#1e1894] h-2.5 rounded-full"></div>
+                          <div className="w-4 md:w-6 bg-[#1e1894] h-2 md:h-2.5 rounded-full"></div>
                         </div>
                       </div>
 
@@ -262,7 +273,7 @@ export default function Home() {
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -100 }}
                           transition={{ duration: 0.5 }}
-                          className="p-4"
+                          className="p-2 md:p-4"
                         >
                           {currentSlide === 0 && (
                             <div className="space-y-4">
@@ -462,11 +473,11 @@ export default function Home() {
                       </AnimatePresence>
 
                       {/* Navigation Dots */}
-                      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                      <div className="absolute bottom-2 md:bottom-4 left-0 right-0 flex justify-center gap-1 md:gap-2">
                         {[0, 1, 2].map((dot) => (
                           <motion.button
                             key={dot}
-                            className={`w-2 h-2 rounded-full ${
+                            className={`w-1.5 md:w-2 h-1.5 md:h-2 rounded-full ${
                               currentSlide === dot ? 'bg-[#1e1894]' : 'bg-gray-300'
                             }`}
                             onClick={() => handleSlideChange(dot)}
@@ -478,11 +489,11 @@ export default function Home() {
                   </div>
 
                   {/* Right Side - Feature Descriptions */}
-                  <div className="w-[400px] space-y-8 py-8">
+                  <div className="w-full md:w-[400px] space-y-3 md:space-y-8 py-2 md:py-8">
                     <motion.div
-                      className={`p-6 rounded-2xl transition-all duration-300 cursor-pointer ${
+                      className={`p-3 md:p-6 rounded-xl md:rounded-2xl transition-all duration-300 cursor-pointer ${
                         currentSlide === 0 
-                          ? 'bg-[#1e1894]/5 shadow-lg scale-105' 
+                          ? 'bg-[#1e1894]/5 shadow-lg scale-[1.02] md:scale-105' 
                           : 'bg-transparent hover:bg-gray-50'
                       }`}
                       initial={{ opacity: 0, x: 20 }}
@@ -490,14 +501,14 @@ export default function Home() {
                       transition={{ delay: 0.1 }}
                       onClick={() => handleSlideChange(0)}
                     >
-                      <h3 className="text-xl font-semibold text-[#1e1894] mb-2">Smart Team Matching</h3>
-                      <p className="text-gray-600">Our AI-powered algorithm connects you with the perfect teammates based on skills and goals.</p>
+                      <h3 className="text-lg md:text-xl font-semibold text-[#1e1894] mb-1 md:mb-2">Smart Team Matching</h3>
+                      <p className="text-sm md:text-base text-gray-600">Our AI-powered algorithm connects you with the perfect teammates based on skills and goals.</p>
                     </motion.div>
 
                     <motion.div
-                      className={`p-6 rounded-2xl transition-all duration-300 cursor-pointer ${
+                      className={`p-3 md:p-6 rounded-xl md:rounded-2xl transition-all duration-300 cursor-pointer ${
                         currentSlide === 1 
-                          ? 'bg-[#1e1894]/5 shadow-lg scale-105' 
+                          ? 'bg-[#1e1894]/5 shadow-lg scale-[1.02] md:scale-105' 
                           : 'bg-transparent hover:bg-gray-50'
                       }`}
                       initial={{ opacity: 0, x: 20 }}
@@ -505,14 +516,14 @@ export default function Home() {
                       transition={{ delay: 0.2 }}
                       onClick={() => handleSlideChange(1)}
                     >
-                      <h3 className="text-xl font-semibold text-[#1e1894] mb-2">Dedicated Chat Rooms</h3>
-                      <p className="text-gray-600">Each hackathon gets its own space for participants to collaborate and share ideas.</p>
+                      <h3 className="text-lg md:text-xl font-semibold text-[#1e1894] mb-1 md:mb-2">Dedicated Chat Rooms</h3>
+                      <p className="text-sm md:text-base text-gray-600">Each hackathon gets its own space for participants to collaborate and share ideas.</p>
                     </motion.div>
 
                     <motion.div
-                      className={`p-6 rounded-2xl transition-all duration-300 cursor-pointer ${
+                      className={`p-3 md:p-6 rounded-xl md:rounded-2xl transition-all duration-300 cursor-pointer ${
                         currentSlide === 2 
-                          ? 'bg-[#1e1894]/5 shadow-lg scale-105' 
+                          ? 'bg-[#1e1894]/5 shadow-lg scale-[1.02] md:scale-105' 
                           : 'bg-transparent hover:bg-gray-50'
                       }`}
                       initial={{ opacity: 0, x: 20 }}
@@ -520,8 +531,8 @@ export default function Home() {
                       transition={{ delay: 0.3 }}
                       onClick={() => handleSlideChange(2)}
                     >
-                      <h3 className="text-xl font-semibold text-[#1e1894] mb-2">Real-time Analytics</h3>
-                      <p className="text-gray-600">Track participation, team formation, and project progress with comprehensive analytics.</p>
+                      <h3 className="text-lg md:text-xl font-semibold text-[#1e1894] mb-1 md:mb-2">Real-time Analytics</h3>
+                      <p className="text-sm md:text-base text-gray-600">Track participation, team formation, and project progress with comprehensive analytics.</p>
                     </motion.div>
                   </div>
                 </div>
@@ -532,10 +543,10 @@ export default function Home() {
       </div>
 
       {/* About Us Section */}
-      <section className="w-full py-16">
-        <div className="px-4">
+      <section id="about-section" className="w-full py-8 md:py-16">
+        <div className="px-2 md:px-4">
           <div className="mx-auto max-w-7xl">
-            <div className="bg-[#1e1894] rounded-3xl p-12 text-white relative overflow-hidden">
+            <div className="bg-[#1e1894] rounded-2xl md:rounded-3xl p-6 md:p-12 text-white relative overflow-hidden">
               {/* Background Animation */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#1e1894] to-[#4361ee]">
                 <div className="absolute inset-0">
@@ -737,7 +748,7 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
   if (side === "left") {
     const content = currentContent as ArtisticSlide
     return (
-      <div className="h-full relative overflow-hidden bg-black">
+      <div className="h-full relative overflow-hidden bg-black rounded-xl md:rounded-2xl">
         {/* Artistic Background Patterns */}
         {content.pattern === "cyberpunk" ? (
           <div className="absolute inset-0">
@@ -810,9 +821,9 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
         <div className={`absolute inset-0 bg-gradient-to-br ${content.gradient} opacity-30 mix-blend-overlay`} />
 
         {/* Title */}
-        <div className="relative z-10 h-full flex items-center justify-center p-8">
+        <div className="relative z-10 h-full flex items-center justify-center p-2 md:p-6">
           <motion.h2
-            className="text-5xl font-bold text-white text-center"
+            className="text-sm md:text-3xl font-bold text-white text-center px-2"
             style={{ 
               fontFamily: 'Space Grotesk, sans-serif',
               letterSpacing: '-0.02em',
@@ -831,11 +842,11 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
 
   const content = currentContent as ContentSlide
   return (
-    <div className="h-full flex flex-col justify-between p-8 relative overflow-hidden bg-white">
-      <div className="relative z-10 space-y-6">
-        <div className="space-y-3">
+    <div className="h-full flex flex-col justify-between p-2 md:p-6 relative overflow-hidden bg-white rounded-xl md:rounded-2xl">
+      <div className="relative z-10 space-y-0.5 md:space-y-3">
+        <div className="space-y-0.5 md:space-y-2">
           <motion.span 
-            className="uppercase text-xs font-medium tracking-[0.2em] block text-[#1e1894]"
+            className="uppercase text-[8px] md:text-xs font-medium tracking-[0.1em] md:tracking-[0.2em] block text-[#1e1894]"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
@@ -843,7 +854,7 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
             {content.subtitle}
           </motion.span>
           <motion.h2
-            className="text-3xl font-bold text-[#1e1894] mb-4"
+            className="text-xs md:text-2xl font-bold text-[#1e1894] mb-0.5 md:mb-2"
             style={{ fontFamily: 'Space Grotesk, sans-serif' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -852,7 +863,7 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
             {content.title}
           </motion.h2>
           <motion.p
-            className="text-lg leading-relaxed text-gray-600"
+            className="text-[8px] md:text-base leading-relaxed text-gray-600 line-clamp-2 md:line-clamp-none"
             style={{ fontFamily: 'DM Sans, sans-serif' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -864,17 +875,17 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
       </div>
 
       <motion.button
-        className="group w-full px-6 py-3 rounded-xl font-medium text-sm
+        className="group w-[100px] md:w-full mx-auto px-2 md:px-4 py-1 md:py-2.5 rounded-full font-medium text-[8px] md:text-sm
                    bg-[#1e1894] text-white hover:bg-[#1e1894]/90
-                   transition-all duration-300"
+                   transition-all duration-300 shadow-sm hover:shadow-md"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         style={{ fontFamily: 'Space Grotesk, sans-serif' }}
       >
-        <span className="relative z-10 flex items-center justify-center gap-2">
+        <span className="relative z-10 flex items-center justify-center gap-0.5 md:gap-2">
           Explore Now
           <motion.svg 
-            className="w-4 h-4" 
+            className="w-2 h-2 md:w-4 md:h-4" 
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor"
