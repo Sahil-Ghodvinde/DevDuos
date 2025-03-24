@@ -2,11 +2,34 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { hackathons } from "@/lib/data"
+import Link from "next/link"
+import dynamic from 'next/dynamic'
 import HackathonCard from "@/components/hackathon-card"
+import { getHackathons } from "@/lib/hackathons"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import LoadingScreen from "@/components/loading-screen"
+import NoSSR from "@/components/no-ssr"
+
+// Dynamically import hackathon card with NoSSR
+const DynamicHackathonCard = dynamic(
+  () => Promise.resolve(HackathonCard),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="bg-white/40 backdrop-blur-xl rounded-[2rem] h-[320px] p-8 animate-pulse">
+        <div className="h-4 bg-gray-200 rounded w-24 mb-6"></div>
+        <div className="h-8 bg-gray-200 rounded w-3/4 mb-6"></div>
+        <div className="h-6 bg-gray-200 rounded w-1/3 mb-8"></div>
+        <div className="flex gap-2 mb-8">
+          <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+          <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+          <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+        </div>
+      </div>
+    )
+  }
+)
 
 interface ArtisticSlide {
   type: 'artistic';
@@ -24,19 +47,29 @@ interface ContentSlide {
 }
 
 export default function Home() {
+  const [hackathons, setHackathons] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [displayedHackathons, setDisplayedHackathons] = useState(4)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [slideDirection, setSlideDirection] = useState(1)
   const itemsPerPage = 4
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    // Simulate loading time
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 2500)
-
-    return () => clearTimeout(timer)
+    setIsMounted(true)
+    async function loadHackathons() {
+      setIsLoading(true)
+      try {
+        const data = await getHackathons()
+        setHackathons(data)
+      } catch (error) {
+        console.error("Failed to load hackathons:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadHackathons()
   }, [])
 
   useEffect(() => {
@@ -57,8 +90,17 @@ export default function Home() {
   }
 
   const handleSeeMore = () => {
+    const itemsPerPage = 2
     const nextCount = Math.min(displayedHackathons + itemsPerPage, hackathons.length)
     setDisplayedHackathons(nextCount)
+  }
+
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="w-16 h-16 border-4 border-[#1e1894]/20 border-t-[#1e1894] rounded-full animate-spin"></div>
+      </div>
+    )
   }
 
   if (isLoading) {
@@ -184,7 +226,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 min-h-[400px]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[400px]">
                 {hackathons.slice(0, displayedHackathons).map((hackathon, index) => (
                   <motion.div
                     key={hackathon.id}
@@ -741,12 +783,12 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
         gradient: "from-[#1e1894] via-[#1e1894] to-[#1e1894]"
       }
     ]
-  }
+  };
 
-  const currentContent = slides[side][currentSlide]
+  const currentContent = slides[side][currentSlide];
 
   if (side === "left") {
-    const content = currentContent as ArtisticSlide
+    const content = currentContent as ArtisticSlide;
     return (
       <div className="h-full relative overflow-hidden bg-black rounded-xl md:rounded-2xl">
         {/* Artistic Background Patterns */}
@@ -837,10 +879,10 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
           </motion.h2>
         </div>
       </div>
-    )
+    );
   }
 
-  const content = currentContent as ContentSlide
+  const content = currentContent as ContentSlide;
   return (
     <div className="h-full flex flex-col justify-between p-2 md:p-6 relative overflow-hidden bg-white rounded-xl md:rounded-2xl">
       <div className="relative z-10 space-y-0.5 md:space-y-3">
@@ -899,6 +941,6 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
         </span>
       </motion.button>
     </div>
-  )
+  );
 }
 

@@ -5,21 +5,23 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { hackathons } from "@/lib/data"
+import dynamic from 'next/dynamic'
+import { getHackathonById } from "@/lib/hackathons"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
+import NoSSR from "@/components/no-ssr"
 
 interface Hackathon {
   id: string
   title: string
   description: string
-  image: string
+  image?: string
   location: string
   date: string
   closes: string
-  organizer?: string
-  mode?: "Online" | "Offline" | "Hybrid"
+  mode?: string
   category?: string
+  organizer?: string
   timeline?: {
     start: string
     end: string
@@ -45,16 +47,34 @@ export default function HackathonDetail() {
   const router = useRouter()
   const [hackathon, setHackathon] = useState<Hackathon | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    if (params.id) {
-      const found = hackathons.find((h) => h.id === params.id)
-      if (found) {
-        setHackathon(found as Hackathon)
+    setIsMounted(true)
+    async function loadHackathon() {
+      if (!params.id) return
+      
+      setIsLoading(true)
+      try {
+        const data = await getHackathonById(params.id as string)
+        setHackathon(data)
+      } catch (error) {
+        console.error("Failed to load hackathon:", error)
+      } finally {
+        setIsLoading(false)
       }
-      setIsLoading(false)
     }
+    
+    loadHackathon()
   }, [params.id])
+
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="w-16 h-16 border-4 border-[#1e1894]/20 border-t-[#1e1894] rounded-full animate-spin"></div>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
