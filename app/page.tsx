@@ -58,6 +58,13 @@ export default function Home() {
     // Fetch hackathons from Supabase
     async function fetchHackathons() {
       try {
+        // Check if Supabase is properly configured
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+          console.error('Supabase configuration is missing');
+          setIsLoading(false);
+          return;
+        }
+
         const hackathonsData = await getHackathons()
         setHackathons(hackathonsData)
         setIsLoading(false)
