@@ -5,11 +5,9 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import dynamic from 'next/dynamic'
 import { getHackathonById } from "@/lib/hackathons"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import NoSSR from "@/components/no-ssr"
 
 interface Hackathon {
   id: string
@@ -20,8 +18,15 @@ interface Hackathon {
   date: string
   closes: string
   mode?: string
-  category?: string
+  theme?: string
+  status?: "OPEN" | "LIVE" | "CLOSED"
+  participants?: number
   organizer?: string
+  url?: string
+  prizeAmount?: string
+  tags?: string[]
+  sourcePlatform?: string
+  lastUpdated?: string
   timeline?: {
     start: string
     end: string
@@ -57,7 +62,18 @@ export default function HackathonDetail() {
       setIsLoading(true)
       try {
         const data = await getHackathonById(params.id as string)
-        setHackathon(data)
+        if (data) {
+          // Validate and transform the status
+          const validatedData = {
+            ...data,
+            status: (data.status === "OPEN" || data.status === "LIVE" || data.status === "CLOSED" 
+              ? data.status 
+              : undefined) as "OPEN" | "LIVE" | "CLOSED" | undefined
+          }
+          setHackathon(validatedData)
+        } else {
+          setHackathon(null)
+        }
       } catch (error) {
         console.error("Failed to load hackathon:", error)
       } finally {
@@ -163,7 +179,9 @@ export default function HackathonDetail() {
               <div className="relative w-full mx-auto max-w-4xl" style={{ paddingTop: "30%" }}>
                 <div className="absolute inset-0 rounded-xl overflow-hidden">
                   <Image 
-                    src={hackathon?.image || ""}
+                    src={hackathon?.image && (hackathon.image.startsWith('http') || hackathon.image.startsWith('/')) 
+                      ? hackathon.image 
+                      : "/default_hackathon.png"}
                     alt={hackathon?.title || "Hackathon image"}
                     fill
                     sizes="(max-width: 768px) 100vw, 800px"
@@ -194,13 +212,25 @@ export default function HackathonDetail() {
                       <span className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-medium">
                         {hackathon?.mode || "Online"}
                       </span>
-                      <span className="px-4 py-2 bg-purple-50 text-purple-600 rounded-xl font-medium">
-                        {hackathon?.category || "Hackathon"}
-                      </span>
+                      {hackathon?.tags?.some(tag => tag.toLowerCase().includes('theme')) && (
+                        <span className="px-4 py-2 bg-purple-50 text-purple-600 rounded-xl font-medium">
+                          {hackathon.tags.find(tag => tag.toLowerCase().includes('theme'))?.replace(/^theme/i, '')}
+                        </span>
+                      )}
                       <span className="px-4 py-2 bg-[#1e1894] text-white rounded-xl">
                         {hackathon?.location}
                       </span>
+                      {hackathon?.organizer && (
+                        <span className="px-4 py-2 bg-green-50 text-green-600 rounded-xl font-medium">
+                          {hackathon?.organizer}
+                        </span>
+                      )}
                     </div>
+                    {hackathon?.sourcePlatform && (
+                      <div className="text-sm text-gray-500 mb-4">
+                        Source: {hackathon.sourcePlatform}
+                      </div>
+                    )}
                   </motion.div>
                 </div>
 
@@ -222,16 +252,20 @@ export default function HackathonDetail() {
                     </svg>
                     Find Teammate
                   </button>
-                  <button className="px-6 py-3 bg-[#1e1894] text-white rounded-xl font-medium
-                                   hover:bg-[#1e1894]/90 transition-all duration-300
-                                   shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
-                                   flex items-center justify-center gap-2">
+                  <a 
+                    href={hackathon?.url || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 bg-[#1e1894] text-white rounded-xl font-medium
+                              hover:bg-[#1e1894]/90 transition-all duration-300
+                              shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
+                              flex items-center justify-center gap-2">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
                             d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                     </svg>
                     Apply Now
-                  </button>
+                  </a>
                   <button className="px-6 py-3 bg-white border-2 border-[#1e1894] text-[#1e1894] rounded-xl 
                                    font-medium hover:bg-[#1e1894] hover:text-white transition-all duration-300
                                    shadow-lg shadow-[#1e1894]/10 hover:shadow-xl hover:shadow-[#1e1894]/20
@@ -293,9 +327,8 @@ export default function HackathonDetail() {
                   <div className="relative">
                     <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
                     {[
-                      { date: "Phase 1", title: "Team Formation & Ideation" },
-                      { date: "Phase 2", title: "Development & Mentorship" },
-                      { date: "Phase 3", title: "Submission & Judging" }
+                      { date: hackathon?.date || "Start Date", title: "Hackathon Begins" },
+                      { date: hackathon?.closes || "Registration Deadline", title: "Registration Closes" }
                     ].map((phase, i) => (
                       <motion.div
                         key={i}
@@ -314,7 +347,7 @@ export default function HackathonDetail() {
                 </div>
               </motion.section>
 
-              {/* Tracks Section */}
+              {/* Theme Section */}
               <motion.section
                 className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg"
                 initial={{ opacity: 0, y: 20 }}
@@ -322,29 +355,52 @@ export default function HackathonDetail() {
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Tracks</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[
-                    { icon: "💻", title: "Web3 & Blockchain", desc: "Build decentralized solutions" },
-                    { icon: "🤖", title: "AI & ML", desc: "Develop intelligent applications" },
-                    { icon: "🌐", title: "Open Innovation", desc: "Create impactful solutions" },
-                    { icon: "🎮", title: "Gaming", desc: "Design immersive experiences" }
-                  ].map((track, i) => (
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Theme</h2>
+                <div className="grid grid-cols-1 gap-6">
+                  {hackathon?.tags?.some(tag => tag.toLowerCase().includes('theme')) ? (
+                    hackathon.tags
+                      .filter(tag => tag.toLowerCase().includes('theme'))
+                      .map((tag, i) => (
+                        <motion.div
+                          key={i}
+                          className="p-6 bg-gray-50 rounded-2xl"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.5 }}
+                          viewport={{ once: true }}
+                        >
+                          <div className="text-3xl mb-4">🎯</div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">{tag}</h3>
+                          <p className="text-gray-600">The central theme for this hackathon</p>
+                        </motion.div>
+                      ))
+                  ) : (
                     <motion.div
-                      key={i}
-                      className="p-6 bg-gray-50 rounded-2xl"
+                      className="p-6 bg-gray-50 rounded-2xl text-center"
                       initial={{ opacity: 0, scale: 0.95 }}
                       whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      transition={{ duration: 0.5 }}
                       viewport={{ once: true }}
                     >
-                      <div className="text-3xl mb-4">{track.icon}</div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{track.title}</h3>
-                      <p className="text-gray-600">{track.desc}</p>
+                      <div className="text-3xl mb-4">🔍</div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Theme Not Available</h3>
+                      <p className="text-gray-600 mb-4">Visit the official website to learn more about the hackathon theme</p>
+                      <a 
+                        href={hackathon?.url || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block px-6 py-3 bg-[#1e1894] text-white rounded-xl font-medium
+                                 hover:bg-[#1e1894]/90 transition-all duration-300
+                                 shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30"
+                      >
+                        More Details
+                      </a>
                     </motion.div>
-                  ))}
+                  )}
                 </div>
               </motion.section>
+
+              
 
               {/* Prizes Section */}
               <motion.section
@@ -357,27 +413,34 @@ export default function HackathonDetail() {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#1e1894] to-[#4361ee]"></div>
                 <div className="relative z-10">
                   <h2 className="text-2xl font-bold text-white mb-8">Prizes & Rewards</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[
-                      { position: "1st", prize: "$5,000", icon: "🏆" },
-                      { position: "2nd", prize: "$3,000", icon: "🥈" },
-                      { position: "3rd", prize: "$2,000", icon: "🥉" }
-                    ].map((prize, i) => (
-                      <motion.div
-                        key={i}
-                        className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center
-                                 border border-white/20"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: i * 0.1 }}
-                        viewport={{ once: true }}
-                      >
-                        <div className="text-4xl mb-4">{prize.icon}</div>
-                        <div className="text-white/80 mb-2">{prize.position} Place</div>
-                        <div className="text-2xl font-bold text-white">{prize.prize}</div>
-                      </motion.div>
-                    ))}
-                  </div>
+                  {hackathon?.prizeAmount ? (
+                    <div className="text-center mb-8">
+                      <div className="text-white/80 mb-2">Total Prize Pool</div>
+                      <div className="text-3xl font-bold text-white">{hackathon.prizeAmount}</div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {[
+                        { position: "1st", prize: "$5,000", icon: "🏆" },
+                        { position: "2nd", prize: "$3,000", icon: "🥈" },
+                        { position: "3rd", prize: "$2,000", icon: "🥉" }
+                      ].map((prize, i) => (
+                        <motion.div
+                          key={i}
+                          className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center
+                                   border border-white/20"
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                        >
+                          <div className="text-4xl mb-4">{prize.icon}</div>
+                          <div className="text-white/80 mb-2">{prize.position} Place</div>
+                          <div className="text-2xl font-bold text-white">{prize.prize}</div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
                   <div className="mt-8 p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
                     <h3 className="text-lg font-semibold text-white mb-4">Additional Rewards</h3>
                     <ul className="space-y-3 text-white/80">
@@ -385,20 +448,9 @@ export default function HackathonDetail() {
                         <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        Certificates of Participation
+                         For Certificates of Participation and more details click the apply button to visit the official site.
                       </li>
-                      <li className="flex items-center gap-3">
-                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Mentorship Opportunities
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Swag Kits for Top Teams
-                      </li>
+                      
                     </ul>
                   </div>
                 </div>
@@ -425,8 +477,8 @@ export default function HackathonDetail() {
                       </svg>
                     </div>
                     <div>
-                      <div className="text-sm text-gray-500 mb-1">Duration</div>
-                      <div className="font-medium text-gray-900">48 Hours</div>
+                      <div className="text-sm text-gray-500 mb-1">Starts On</div>
+                      <div className="font-medium text-gray-900">{hackathon?.date || "TBA"}</div>
                     </div>
                   </div>
 
@@ -434,12 +486,14 @@ export default function HackathonDetail() {
                     <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
                       <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                     </div>
                     <div>
-                      <div className="text-sm text-gray-500 mb-1">Team Size</div>
-                      <div className="font-medium text-gray-900">2-4 Members</div>
+                      <div className="text-sm text-gray-500 mb-1">Location</div>
+                      <div className="font-medium text-gray-900">{hackathon?.location || "TBA"}</div>
                     </div>
                   </div>
 
@@ -447,12 +501,12 @@ export default function HackathonDetail() {
                     <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
                       <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div>
-                      <div className="text-sm text-gray-500 mb-1">Eligibility</div>
-                      <div className="font-medium text-gray-900">Open for All</div>
+                      <div className="text-sm text-gray-500 mb-1">Prize Pool</div>
+                      <div className="font-medium text-gray-900">{hackathon?.prizeAmount || "TBA"}</div>
                     </div>
                   </div>
                 </div>
@@ -524,12 +578,27 @@ export default function HackathonDetail() {
                   </button>
                 </div>
               </motion.section>
+              
             </div>
           </div>
-        </div>
+        </div> 
+
+        
       </div>
 
       <Footer />
+      
+      {/* Last Updated Information */}
+      {hackathon?.lastUpdated && (
+        <div className="text-center text-sm text-gray-500 pb-4">
+          Hackathon details Last updated: {hackathon.lastUpdated}
+        </div>
+      )}
+      <div className="text-center text-xs text-gray-500 pb-4 px-8 max-w-3xl mx-auto">
+        Disclaimer: We do not own or organize the hackathons listed on this platform. All information is sourced from third-party websites, and we are not responsible for its accuracy, changes, or any actions taken based on this data. By participating in any listed hackathon, you agree to review the official event website for the latest details. We do not assume liability for any issues arising from participation, registration, or other interactions with the listed events.
+      </div>
+
+      
     </div>
   )
 } 

@@ -2,34 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import Link from "next/link"
-import dynamic from 'next/dynamic'
 import HackathonCard from "@/components/hackathon-card"
-import { getHackathons } from "@/lib/hackathons"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import LoadingScreen from "@/components/loading-screen"
-import NoSSR from "@/components/no-ssr"
-
-// Dynamically import hackathon card with NoSSR
-const DynamicHackathonCard = dynamic(
-  () => Promise.resolve(HackathonCard),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="bg-white/40 backdrop-blur-xl rounded-[2rem] h-[320px] p-8 animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-24 mb-6"></div>
-        <div className="h-8 bg-gray-200 rounded w-3/4 mb-6"></div>
-        <div className="h-6 bg-gray-200 rounded w-1/3 mb-8"></div>
-        <div className="flex gap-2 mb-8">
-          <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
-          <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
-          <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
-        </div>
-      </div>
-    )
-  }
-)
+import { getHackathons } from "@/lib/hackathons"
 
 interface ArtisticSlide {
   type: 'artistic';
@@ -46,30 +23,51 @@ interface ContentSlide {
   gradient: string;
 }
 
+// Define the Hackathon interface
+interface Hackathon {
+  id: string
+  title: string
+  description: string
+  image?: string
+  location: string
+  date: string
+  closes: string
+  mode?: "Online" | "Offline" | "Hybrid"
+  theme?: string
+  status?: "OPEN" | "LIVE" | "CLOSED"
+  participants?: number
+  organizer?: string
+}
+
 export default function Home() {
-  const [hackathons, setHackathons] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [displayedHackathons, setDisplayedHackathons] = useState(4)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [slideDirection, setSlideDirection] = useState(1)
+  const [hackathons, setHackathons] = useState<Hackathon[]>([])
+  const [selectedMode, setSelectedMode] = useState<string>("All")
   const itemsPerPage = 4
-  const [isMounted, setIsMounted] = useState(false)
+
+  // Filter hackathons based on selected mode
+  const filteredHackathons = hackathons.filter(hackathon => {
+    if (selectedMode === "All") return true
+    return hackathon.mode === selectedMode
+  })
 
   useEffect(() => {
-    setIsMounted(true)
-    async function loadHackathons() {
-      setIsLoading(true)
+    // Fetch hackathons from Supabase
+    async function fetchHackathons() {
       try {
-        const data = await getHackathons()
-        setHackathons(data)
+        const hackathonsData = await getHackathons()
+        setHackathons(hackathonsData)
+        setIsLoading(false)
       } catch (error) {
-        console.error("Failed to load hackathons:", error)
-      } finally {
+        console.error("Error fetching hackathons:", error)
         setIsLoading(false)
       }
     }
-    
-    loadHackathons()
+
+    fetchHackathons()
   }, [])
 
   useEffect(() => {
@@ -90,17 +88,8 @@ export default function Home() {
   }
 
   const handleSeeMore = () => {
-    const itemsPerPage = 2
     const nextCount = Math.min(displayedHackathons + itemsPerPage, hackathons.length)
     setDisplayedHackathons(nextCount)
-  }
-
-  if (!isMounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="w-16 h-16 border-4 border-[#1e1894]/20 border-t-[#1e1894] rounded-full animate-spin"></div>
-      </div>
-    )
   }
 
   if (isLoading) {
@@ -203,14 +192,20 @@ export default function Home() {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4 mb-4 md:mb-8">
                 <h2 className="text-xl md:text-3xl font-bold text-[#1e1894]">Upcoming Hackathons</h2>
                 <div className="relative w-full md:w-auto min-w-[200px]">
-                  <select className="w-full bg-white/80 border-2 border-gray-200 rounded-xl px-3 md:px-4 py-2 md:py-2.5 pr-10 
-                                   appearance-none focus:outline-none focus:border-[#1e1894] focus:ring-2 focus:ring-[#1e1894]/20
-                                   transition-all duration-300 text-sm md:text-base">
-                    <option>Mode</option>
-                    <option>All</option>
-                    <option>Online</option>
-                    <option>Offline</option>
-                    <option>Hybrid</option>
+                  <select 
+                    className="w-full bg-white/80 border-2 border-gray-200 rounded-xl px-3 md:px-4 py-2 md:py-2.5 pr-10 
+                               appearance-none focus:outline-none focus:border-[#1e1894] focus:ring-2 focus:ring-[#1e1894]/20
+                               transition-all duration-300 text-sm md:text-base"
+                    value={selectedMode}
+                    onChange={(e) => {
+                      setSelectedMode(e.target.value)
+                      setDisplayedHackathons(4) // Reset displayed count when filter changes
+                    }}
+                  >
+                    <option value="All">All</option>
+                    <option value="Online">Online</option>
+                    <option value="offline">Offline</option>
+                    <option value="Hybrid">Hybrid</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#1e1894]">
                     <svg
@@ -226,8 +221,8 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[400px]">
-                {hackathons.slice(0, displayedHackathons).map((hackathon, index) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 min-h-[400px]">
+                {filteredHackathons.slice(0, displayedHackathons).map((hackathon, index) => (
                   <motion.div
                     key={hackathon.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -239,7 +234,7 @@ export default function Home() {
                 ))}
               </div>
 
-              {displayedHackathons < hackathons.length && (
+              {displayedHackathons < filteredHackathons.length && (
                 <div className="text-center mt-6 md:mt-10">
                   <motion.button
                     onClick={handleSeeMore}
@@ -783,12 +778,12 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
         gradient: "from-[#1e1894] via-[#1e1894] to-[#1e1894]"
       }
     ]
-  };
+  }
 
-  const currentContent = slides[side][currentSlide];
+  const currentContent = slides[side][currentSlide]
 
   if (side === "left") {
-    const content = currentContent as ArtisticSlide;
+    const content = currentContent as ArtisticSlide
     return (
       <div className="h-full relative overflow-hidden bg-black rounded-xl md:rounded-2xl">
         {/* Artistic Background Patterns */}
@@ -879,10 +874,10 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
           </motion.h2>
         </div>
       </div>
-    );
+    )
   }
 
-  const content = currentContent as ContentSlide;
+  const content = currentContent as ContentSlide
   return (
     <div className="h-full flex flex-col justify-between p-2 md:p-6 relative overflow-hidden bg-white rounded-xl md:rounded-2xl">
       <div className="relative z-10 space-y-0.5 md:space-y-3">
@@ -941,6 +936,5 @@ function AnimatedSlides({ side, currentSlide }: { side: "left" | "right", curren
         </span>
       </motion.button>
     </div>
-  );
+  )
 }
-

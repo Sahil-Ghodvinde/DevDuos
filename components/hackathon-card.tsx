@@ -13,6 +13,7 @@ interface Hackathon {
   closes: string
   mode?: "Online" | "Offline" | "Hybrid"
   theme?: string
+  tags?: string[]
   status?: "OPEN" | "LIVE" | "CLOSED"
 }
 
@@ -22,6 +23,9 @@ export default function HackathonCard({ hackathon }: { hackathon: Hackathon }) {
   const handleCardClick = () => {
     router.push(`/${hackathon.id}`)
   }
+
+  const themeTag = hackathon?.tags?.find(tag => tag.toLowerCase().includes('theme'))
+  const displayTheme = themeTag ? themeTag.replace(/^theme/i, '') : "BLOCKCHAIN"
 
   return (
     <motion.div
@@ -52,7 +56,7 @@ export default function HackathonCard({ hackathon }: { hackathon: Hackathon }) {
           <span className="text-gray-600 font-medium text-xs sm:text-sm">THEME</span>
           <div className="h-3 sm:h-4 w-[1px] bg-gray-300"></div>
           <span className="text-gray-900 font-semibold uppercase text-xs sm:text-sm tracking-wide">
-            {hackathon.theme || "BLOCKCHAIN"}
+            {displayTheme}
           </span>
         </div>
       </div>
@@ -64,7 +68,7 @@ export default function HackathonCard({ hackathon }: { hackathon: Hackathon }) {
           hackathon.mode === 'Online' 
             ? 'bg-blue-50 text-blue-600' 
             : hackathon.mode === 'Offline'
-            ? 'bg-purple-50 text-purple-600'
+            ? 'bg-green-50 text-green-600'
             : 'bg-emerald-50 text-emerald-600'
         }`}>
           {hackathon.mode || 'ONLINE'}

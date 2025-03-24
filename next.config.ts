@@ -3,10 +3,27 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: [
-      'ingenioushackathon.devfolio.co',
-      'assets.devfolio.co',
-      'images.unsplash.com'
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ingenioushackathon.devfolio.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.devfolio.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'frosthack-2025.devfolio.co',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.devfolio.co',
+      }
     ],
   },
 };

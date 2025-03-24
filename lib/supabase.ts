@@ -66,10 +66,15 @@ export function mapSupabaseToFrontend(hackathon: SupabaseHackathon) {
     closes: `closes on ${formatDate(hackathon.registration_deadline)}`,
     mode: (hackathon.mode || 'Online') as "Online" | "Offline" | "Hybrid",
     theme: Array.isArray(hackathon.tags) && hackathon.tags.length > 0 ? hackathon.tags[0] : "TECHNOLOGY",
+    tags: hackathon.tags || [],
     participants: participantsCount,
     status: "OPEN",
     image: hackathon.banner_image_url || `img${imgIndex}`,
-    organizer: hackathon.organizer || 'Unknown Organizer'
+    organizer: hackathon.organizer || 'Unknown Organizer',
+    url: hackathon.url || '',
+    prizeAmount: hackathon.prize_amount || '',
+    sourcePlatform: hackathon.source_platform || '',
+    lastUpdated: formatDate(hackathon.last_updated) || ''
   };
 }
 
