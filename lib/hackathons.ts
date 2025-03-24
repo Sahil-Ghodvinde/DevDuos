@@ -4,6 +4,12 @@ import { hackathons as dummyHackathons } from './data';
 // Keep only the first dummy hackathon and replace the rest with data from Supabase(removed this in v2.3)
 export async function getHackathons() {
   try {
+    // Check if Supabase is available
+    if (!supabase) {
+      console.error('Supabase client is not initialized');
+      return dummyHackathons;
+    }
+
     // Fetch hackathons from Supabase
     const { data, error } = await supabase
       .from('hackathons')
@@ -31,6 +37,12 @@ export async function getHackathons() {
 // For detailed view of a single hackathon
 export async function getHackathonById(id: string) {
   try {
+    // Check if Supabase is available
+    if (!supabase) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     // Get hackathon from Supabase
     const { data, error } = await supabase
       .from('hackathons')

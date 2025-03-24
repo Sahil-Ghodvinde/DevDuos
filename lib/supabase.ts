@@ -1,15 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Create a single supabase client for the entire app
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
-  {
-    auth: {
-      persistSession: false
-    }
-  }
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+// Only create the client if we have the required environment variables
+export const supabase = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false
+      }
+    })
+  : null;
 
 // Type definition for the hackathons from your database
 export interface SupabaseHackathon {

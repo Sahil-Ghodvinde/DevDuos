@@ -66,10 +66,16 @@ export default function Home() {
         }
 
         const hackathonsData = await getHackathons()
-        setHackathons(hackathonsData)
+        if (hackathonsData) {
+          setHackathons(hackathonsData)
+        } else {
+          console.error('Failed to fetch hackathons');
+          setHackathons([])
+        }
         setIsLoading(false)
       } catch (error) {
         console.error("Error fetching hackathons:", error)
+        setHackathons([])
         setIsLoading(false)
       }
     }
