@@ -668,7 +668,7 @@ export default function HackathonDetail() {
                     </button>
                   </div>
                   <div className="mt-6 text-center">
-                    <span className="text-white/70 text-sm">We're here to help you succeed!</span>
+                    <span className="text-white/70 text-sm">We are here to help you succeed!</span>
                   </div>
                 </div>
               </motion.section>
