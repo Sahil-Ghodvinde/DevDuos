@@ -241,16 +241,15 @@ export default function HackathonDetail() {
                   transition={{ duration: 0.5, delay: 0.3 }}
                 >
                   <button 
-                    onClick={() => router.push('/soon')}
-                    className="px-6 py-3 bg-[#1e1894] text-white rounded-xl font-medium
-                               hover:bg-[#1e1894]/90 transition-all duration-300
-                               shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
+                    onClick={() => router.push('/find_teammate')}
+                    className="px-6 py-3 bg-white border-2 border-[#1e1894]/20 text-[#1e1894] rounded-xl font-medium
+                               hover:bg-[#1e1894]/5 transition-all duration-300
+                               shadow-md hover:shadow-lg 
                                flex items-center justify-center gap-2">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                            d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292V15M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
-                    Find Teammate
+                    Find Teammates
                   </button>
                   <a 
                     href={hackathon?.url || "#"}
@@ -303,46 +302,70 @@ export default function HackathonDetail() {
                 </div>
               </motion.section>
 
-              {/* Timeline Section */}
+              {/* Timeline Section - Enhanced */}
               <motion.section
-                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg"
+                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg overflow-hidden relative"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Timeline</h2>
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row gap-6">
-                    <div className="flex-1 p-6 bg-blue-50 rounded-2xl">
-                      <div className="text-blue-600 font-medium mb-2">Start Date</div>
-                      <div className="text-xl font-semibold text-gray-900">{hackathon?.date}</div>
+                {/* Subtle Background Elements */}
+                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-[#1e1894]/5 blur-2xl"></div>
+                <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-[#4361ee]/5 blur-2xl"></div>
+                
+                <div className="relative z-10">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span className="mr-2">Timeline</span>
+                    <div className="h-1 flex-grow bg-gradient-to-r from-[#1e1894]/20 to-transparent rounded-full"></div>
+                  </h2>
+                  <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row gap-6">
+                      <div className="flex-1 p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl border border-blue-100 shadow-sm">
+                        <div className="text-blue-600 font-medium mb-2 flex items-center gap-2">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          Start Date
+                        </div>
+                        <div className="text-xl font-semibold text-gray-900">{hackathon?.date}</div>
+                      </div>
+                      <div className="flex-1 p-6 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl border border-purple-100 shadow-sm">
+                        <div className="text-purple-600 font-medium mb-2 flex items-center gap-2">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Registration Closes
+                        </div>
+                        <div className="text-xl font-semibold text-gray-900">{hackathon?.closes}</div>
+                      </div>
                     </div>
-                    <div className="flex-1 p-6 bg-purple-50 rounded-2xl">
-                      <div className="text-purple-600 font-medium mb-2">Registration Closes</div>
-                      <div className="text-xl font-semibold text-gray-900">{hackathon?.closes}</div>
-                    </div>
-                  </div>
 
-                  <div className="relative">
-                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-                    {[
-                      { date: hackathon?.date || "Start Date", title: "Hackathon Begins" },
-                      { date: hackathon?.closes || "Registration Deadline", title: "Registration Closes" }
-                    ].map((phase, i) => (
-                      <motion.div
-                        key={i}
-                        className="relative pl-12 pb-8"
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: i * 0.1 }}
-                        viewport={{ once: true }}
-                      >
-                        <div className="absolute left-2 top-2 w-4 h-4 rounded-full bg-[#1e1894]"></div>
-                        <div className="text-sm text-gray-500 mb-1">{phase.date}</div>
-                        <div className="font-medium text-gray-900">{phase.title}</div>
-                      </motion.div>
-                    ))}
+                    <div className="relative pl-6 pt-6">
+                      <div className="absolute left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-[#1e1894] to-[#4361ee] rounded-full"></div>
+                      {[
+                        { date: hackathon?.date || "Start Date", title: "Hackathon Begins", icon: "🚀" },
+                        { date: hackathon?.closes || "Registration Deadline", title: "Registration Closes", icon: "🔒" }
+                      ].map((phase, i) => (
+                        <motion.div
+                          key={i}
+                          className="relative pl-10 pb-10"
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.5, delay: i * 0.1 }}
+                          viewport={{ once: true }}
+                        >
+                          <div className="absolute left-0 top-0 w-8 h-8 rounded-full bg-gradient-to-r from-[#1e1894] to-[#4361ee] flex items-center justify-center text-white shadow-lg">
+                            <span>{phase.icon}</span>
+                          </div>
+                          <div className="text-sm text-[#1e1894]/70 font-medium mb-1">{phase.date}</div>
+                          <div className="font-bold text-gray-900 text-lg">{phase.title}</div>
+                          <div className="mt-2 text-gray-600 text-sm">
+                            {i === 0 ? "Get ready to showcase your skills and creativity." : "Last chance to join this exciting hackathon."}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </motion.section>
@@ -402,7 +425,7 @@ export default function HackathonDetail() {
 
               
 
-              {/* Prizes Section */}
+              {/* Prizes Section - Enhanced */}
               <motion.section
                 className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg overflow-hidden relative"
                 initial={{ opacity: 0, y: 20 }}
@@ -411,12 +434,28 @@ export default function HackathonDetail() {
                 viewport={{ once: true }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-[#1e1894] to-[#4361ee]"></div>
+                {/* Decorative elements */}
+                <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full bg-white/10 blur-3xl"></div>
+                
+                <div className="absolute inset-0 opacity-10" 
+                  style={{
+                    backgroundImage: `radial-gradient(circle at 25px 25px, white 2px, transparent 0)`,
+                    backgroundSize: '50px 50px'
+                  }}
+                ></div>
+                
                 <div className="relative z-10">
-                  <h2 className="text-2xl font-bold text-white mb-8">Prizes & Rewards</h2>
+                  <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
+                    <span className="mr-2">🏆</span>
+                    Prizes & Rewards
+                  </h2>
+                  <div className="h-1 w-20 bg-white/20 rounded-full mb-8"></div>
+                  
                   {hackathon?.prizeAmount ? (
                     <div className="text-center mb-8">
                       <div className="text-white/80 mb-2">Total Prize Pool</div>
-                      <div className="text-3xl font-bold text-white">{hackathon.prizeAmount}</div>
+                      <div className="text-5xl font-bold text-white bg-white/10 inline-block px-8 py-3 rounded-xl backdrop-blur-sm">{hackathon.prizeAmount}</div>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -428,7 +467,7 @@ export default function HackathonDetail() {
                         <motion.div
                           key={i}
                           className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center
-                                   border border-white/20"
+                                   border border-white/20 hover:bg-white/20 transition-all duration-300 hover:-translate-y-1"
                           initial={{ opacity: 0, y: 20 }}
                           whileInView={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.5, delay: i * 0.1 }}
@@ -441,17 +480,45 @@ export default function HackathonDetail() {
                       ))}
                     </div>
                   )}
-                  <div className="mt-8 p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
-                    <h3 className="text-lg font-semibold text-white mb-4">Additional Rewards</h3>
-                    <ul className="space-y-3 text-white/80">
+                  <div className="mt-8 p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Additional Rewards
+                    </h3>
+                    <ul className="space-y-3 text-white/90">
                       <li className="flex items-center gap-3">
                         <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                         </svg>
-                         For Certificates of Participation and more details click the apply button to visit the official site.
+                        Certificates of Participation for all contestants
                       </li>
-                      
+                      <li className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Networking opportunities with industry professionals
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Mentorship sessions for winning teams
+                      </li>
                     </ul>
+                  </div>
+                  <div className="mt-6 text-center">
+                    <a 
+                      href={hackathon?.url || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-8 py-3 bg-white text-[#1e1894] rounded-xl font-bold
+                               hover:bg-white/90 transition-all duration-300
+                               shadow-lg shadow-white/20 hover:shadow-xl hover:shadow-white/30"
+                    >
+                      View Official Rules
+                    </a>
                   </div>
                 </div>
               </motion.section>
@@ -459,32 +526,41 @@ export default function HackathonDetail() {
 
             {/* Right Column - Sidebar */}
             <div className="space-y-8">
-              {/* Quick Info Card */}
+              {/* Quick Info Card - Enhanced */}
               <motion.section
-                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg"
+                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg relative overflow-hidden"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Info</h2>
+                {/* Decorative corners */}
+                <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 border-[#1e1894]/20 rounded-tr-xl"></div>
+                <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 border-[#1e1894]/20 rounded-bl-xl"></div>
+                
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                  <svg className="w-6 h-6 text-[#1e1894]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Quick Info
+                </h2>
                 <div className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex items-start gap-4 hover:bg-[#1e1894]/5 p-3 rounded-xl transition-colors duration-200">
+                    <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center shadow-sm">
+                      <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
                               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                     </div>
                     <div>
                       <div className="text-sm text-gray-500 mb-1">Starts On</div>
-                      <div className="font-medium text-gray-900">{hackathon?.date || "TBA"}</div>
+                      <div className="font-bold text-gray-900 text-lg">{hackathon?.date || "TBA"}</div>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex items-start gap-4 hover:bg-[#1e1894]/5 p-3 rounded-xl transition-colors duration-200">
+                    <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center shadow-sm">
+                      <svg className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
                               d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
@@ -493,20 +569,20 @@ export default function HackathonDetail() {
                     </div>
                     <div>
                       <div className="text-sm text-gray-500 mb-1">Location</div>
-                      <div className="font-medium text-gray-900">{hackathon?.location || "TBA"}</div>
+                      <div className="font-bold text-gray-900 text-lg">{hackathon?.location || "TBA"}</div>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex items-start gap-4 hover:bg-[#1e1894]/5 p-3 rounded-xl transition-colors duration-200">
+                    <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center shadow-sm">
+                      <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
                               d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div>
                       <div className="text-sm text-gray-500 mb-1">Prize Pool</div>
-                      <div className="font-medium text-gray-900">{hackathon?.prizeAmount || "TBA"}</div>
+                      <div className="font-bold text-gray-900 text-lg">{hackathon?.prizeAmount || "TBA"}</div>
                     </div>
                   </div>
                 </div>
@@ -546,36 +622,54 @@ export default function HackathonDetail() {
                 </ul>
               </motion.section>
 
-              {/* Contact Section */}
+              {/* Need Help Section - Enhanced */}
               <motion.section
-                className="bg-white/70 backdrop-blur-md rounded-3xl p-8 shadow-lg"
+                className="bg-gradient-to-br from-[#1e1894] to-[#4361ee] rounded-3xl p-8 shadow-lg text-white overflow-hidden relative"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Need Help?</h2>
-                <div className="space-y-4">
-                  <button className="w-full px-6 py-3 bg-[#1e1894] text-white rounded-xl font-medium
-                                   hover:bg-[#1e1894]/90 transition-all duration-300
-                                   shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
-                                   flex items-center justify-center gap-2">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {/* Decorative elements */}
+                <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-2xl"></div>
+                <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-white/10 blur-2xl"></div>
+                
+                <div className="relative z-10">
+                  <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    Join Discord
-                  </button>
-                  <button className="w-full px-6 py-3 bg-white border-2 border-[#1e1894] text-[#1e1894] rounded-xl 
-                                   font-medium hover:bg-[#1e1894] hover:text-white transition-all duration-300
-                                   shadow-lg shadow-[#1e1894]/10 hover:shadow-xl hover:shadow-[#1e1894]/20
-                                   flex items-center justify-center gap-2">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Contact Support
-                  </button>
+                    Need Help?
+                  </h2>
+                  <div className="space-y-4">
+                    <button className="w-full px-6 py-3.5 bg-white text-[#1e1894] rounded-xl font-bold
+                                     hover:bg-white/90 transition-all duration-300 transform hover:-translate-y-1
+                                     shadow-lg shadow-white/20 hover:shadow-xl hover:shadow-white/30
+                                     flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      Join Discord
+                    </button>
+                    <button className="w-full px-6 py-3.5 bg-white/10 backdrop-blur-md text-white rounded-xl 
+                                     font-bold hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-1
+                                     border border-white/20
+                                     shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
+                                     flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      Contact Support
+                    </button>
+                  </div>
+                  <div className="mt-6 text-center">
+                    <span className="text-white/70 text-sm">We're here to help you succeed!</span>
+                  </div>
                 </div>
               </motion.section>
               
