@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import { useState, useEffect, useMemo } from "react"
 import HackathonCard from "@/components/hackathon-card"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
@@ -25,6 +24,7 @@ interface Hackathon {
   status?: "OPEN" | "LIVE" | "CLOSED"
   participants?: number
   organizer?: string
+  sourcePlatform?: string
 }
 
 export default function Home() {
@@ -33,13 +33,51 @@ export default function Home() {
   
   const [hackathons, setHackathons] = useState<Hackathon[]>([])
   const [selectedMode, setSelectedMode] = useState<string>("All")
+  const [selectedPlatform, setSelectedPlatform] = useState<string>("All")
+  const [dateSort, setDateSort] = useState<string>("none")
   const itemsPerPage = 4
 
-  // Filter hackathons based on selected mode
-  const filteredHackathons = hackathons.filter(hackathon => {
-    if (selectedMode === "All") return true
-    return hackathon.mode === selectedMode
-  })
+  // Filter and sort hackathons
+  const filteredHackathons = useMemo(() => {
+    let filtered = [...hackathons]
+
+    // Apply mode filter
+    if (selectedMode !== "All") {
+      filtered = filtered.filter(hackathon => 
+        hackathon.mode?.toLowerCase() === selectedMode.toLowerCase()
+      )
+    }
+
+    // Apply platform filter
+    if (selectedPlatform !== "All") {
+      filtered = filtered.filter(hackathon => 
+        hackathon.sourcePlatform?.toLowerCase() === selectedPlatform.toLowerCase()
+      )
+    }
+
+    // Apply date sorting
+    if (dateSort !== "none") {
+      filtered.sort((a, b) => {
+        // Get the dates from hackathon objects
+        const dateA = a.date ? new Date(a.date) : null
+        const dateB = b.date ? new Date(b.date) : null
+        
+        // Handle missing or invalid dates
+        if (!dateA || isNaN(dateA.getTime())) return 1
+        if (!dateB || isNaN(dateB.getTime())) return -1
+        
+        // Sort based on selected option
+        if (dateSort === "asc") {
+          return dateA.getTime() - dateB.getTime()
+        } else if (dateSort === "desc") {
+          return dateB.getTime() - dateA.getTime()
+        }
+        return 0
+      })
+    }
+
+    return filtered
+  }, [hackathons, selectedMode, selectedPlatform, dateSort])
 
   useEffect(() => {
     // Fetch hackathons from Supabase
@@ -157,6 +195,10 @@ export default function Home() {
                   
                   <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                     <button
+                      onClick={() => {
+                        const hackathonSection = document.querySelector('.hackathon-section');
+                        hackathonSection?.scrollIntoView({ behavior: 'smooth' });
+                      }}
                       className="px-5 py-2.5 bg-gradient-to-r from-[#1e1894] to-[#4361ee] text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-xl hover:shadow-[#1e1894]/30 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
                     >
                       Apply Now
@@ -166,6 +208,7 @@ export default function Home() {
                     </button>
                     
                     <button
+                      onClick={() => window.location.href = '/soon'}
                       className="px-5 py-2.5 bg-white border-2 border-[#1e1894]/20 text-[#1e1894] rounded-xl text-sm font-bold shadow-md hover:bg-[#1e1894]/5 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -174,7 +217,7 @@ export default function Home() {
                       Find Teammates
                     </button>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 pt-1">
                     <div className="flex -space-x-2">
                       {[...Array(4)].map((_, i) => (
@@ -186,13 +229,13 @@ export default function Home() {
                             {String.fromCharCode(65 + i)}
                           </span>
                         </div>
-                      ))}
-                    </div>
+                ))}
+              </div>
                     <div>
                       <span className="text-xs text-gray-600">
                         <span className="font-bold text-[#1e1894]">2,000+</span> developers
                       </span>
-                    </div>
+            </div>
                   </div>
                 </div>
               </div>
@@ -285,7 +328,7 @@ export default function Home() {
       </div>
 
       {/* Hackathon Listing Section */}
-      <div className="w-full px-2 md:px-4">
+      <div className="w-full px-2 md:px-4 hackathon-section">
         <div className="mx-auto max-w-7xl">
           <section className="py-2 md:py-4">
             <div className="bg-gradient-to-b from-white to-gray-50 backdrop-blur-md shadow-xl rounded-2xl md:rounded-3xl p-4 md:p-8 border border-gray-100">
@@ -306,36 +349,77 @@ export default function Home() {
                     </h2>
                   </div>
                   
-                <div className="relative w-full md:w-auto min-w-[200px]">
-                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#1e1894] z-10">
-                      <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                      </svg>
-                    </div>
-                    <select 
-                      className="w-full bg-white border-2 border-gray-200 rounded-xl pl-10 pr-10 py-3
+                  <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full md:w-auto">
+                    {/* Mode Filter */}
+                    <div className="relative w-full md:w-[200px]">
+                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#1e1894] z-10">
+                        <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                        </svg>
+                      </div>
+                      <select 
+                        className="w-full bg-white border-2 border-gray-200 rounded-xl pl-10 pr-10 py-3
                                    appearance-none focus:outline-none focus:border-[#1e1894] focus:ring-2 focus:ring-[#1e1894]/20
-                                transition-all duration-300 text-sm md:text-base font-medium shadow-sm"
-                      value={selectedMode}
-                      onChange={(e) => {
-                        setSelectedMode(e.target.value)
-                        setDisplayedHackathons(4) // Reset displayed count when filter changes
-                      }}
-                    >
-                      <option value="All">All Hackathons</option>
-                      <option value="Online">Online Only</option>
-                      <option value="offline">In-Person Only</option>
-                      <option value="Hybrid">Hybrid Events</option>
+                                 transition-all duration-300 text-sm md:text-base font-medium shadow-sm"
+                        value={selectedMode}
+                        onChange={(e) => {
+                          setSelectedMode(e.target.value)
+                          setDisplayedHackathons(4)
+                        }}
+                      >
+                        <option value="All">All Modes</option>
+                        <option value="Online">Online Only</option>
+                        <option value="offline">In-Person Only</option>
+                        <option value="Hybrid">Hybrid Events</option>
                   </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-[#1e1894]">
-                    <svg
-                      className="w-4 h-4 md:w-5 md:h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7m7 7V3" />
+                    </div>
+
+                    {/* Platform Filter */}
+                    <div className="relative w-full md:w-[200px]">
+                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#1e1894] z-10">
+                        <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                      </div>
+                      <select 
+                        className="w-full bg-white border-2 border-gray-200 rounded-xl pl-10 pr-10 py-3
+                                 appearance-none focus:outline-none focus:border-[#1e1894] focus:ring-2 focus:ring-[#1e1894]/20
+                                 transition-all duration-300 text-sm md:text-base font-medium shadow-sm"
+                        value={selectedPlatform}
+                        onChange={(e) => {
+                          setSelectedPlatform(e.target.value)
+                          setDisplayedHackathons(4)
+                        }}
+                      >
+                        <option value="All">All Platforms</option>
+                        <option value="Devfolio">Devfolio</option>
+                        <option value="Devpost">Devpost</option>
+                        <option value="Unstop">Unstop</option>
+                        <option value="HackerEarth">HackerEarth</option>
+                      </select>
+                    </div>
+
+                    {/* Date Sort Filter */}
+                    <div className="relative w-full md:w-[200px]">
+                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#1e1894] z-10">
+                        <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
+                      </div>
+                      <select 
+                        className="w-full bg-white border-2 border-gray-200 rounded-xl pl-10 pr-10 py-3
+                                 appearance-none focus:outline-none focus:border-[#1e1894] focus:ring-2 focus:ring-[#1e1894]/20
+                                 transition-all duration-300 text-sm md:text-base font-medium shadow-sm"
+                        value={dateSort}
+                        onChange={(e) => {
+                          setDateSort(e.target.value)
+                          setDisplayedHackathons(4)
+                        }}
+                      >
+                        <option value="none">Default Order</option>
+                        <option value="asc">Earliest First</option>
+                        <option value="desc">Latest First</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -344,28 +428,27 @@ export default function Home() {
               {/* Hackathon Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 min-h-[400px]">
                 {filteredHackathons.slice(0, displayedHackathons).map((hackathon, index) => (
-                  <motion.div
+                  <div
                     key={hackathon.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="opacity-0 animate-fade-in"
+                    style={{
+                      animationDelay: `${index * 50}ms`,
+                      animationFillMode: 'forwards'
+                    }}
                   >
                     <HackathonCard hackathon={hackathon} />
-                  </motion.div>
+                  </div>
                 ))}
               </div>
 
               {/* Load More Button */}
               {displayedHackathons < filteredHackathons.length && (
                 <div className="text-center mt-8 md:mt-12">
-                  <motion.button
+                  <button
                     onClick={handleSeeMore}
                     className="px-8 py-3 bg-gradient-to-r from-[#1e1894] to-[#4361ee] text-white rounded-full text-base font-bold
                              shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
                              hover:translate-y-[-2px] transition-all duration-300"
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.98 }}
                   >
                     <span className="flex items-center gap-2">
                       Load More Hackathons
@@ -373,7 +456,7 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                       </svg>
                     </span>
-                  </motion.button>
+                  </button>
                 </div>
               )}
               
@@ -406,8 +489,8 @@ export default function Home() {
                 <span className="absolute bottom-0 left-0 w-full h-[6px] bg-[#1e1894]/10 -z-10 rounded-full"></span>
               </span>
                 </h2>
-          </div>
-          
+                    </div>
+
           {/* Team Matching Feature - Optimized */}
           <section className="py-2 md:py-3">
             <div 
@@ -418,10 +501,10 @@ export default function Home() {
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
                   <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
                   <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                </div>
+                                  </div>
                 <div className="text-white/70 text-xs">team_matching.tsx</div>
-                    </div>
-
+                              </div>
+                              
               {/* Simplified Code View */}
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div className="md:col-span-3">
@@ -430,8 +513,8 @@ export default function Home() {
                       <div className="text-gray-500 w-6 md:w-8 flex-shrink-0 select-none">
                         {Array.from({ length: 6 }).map((_, i) => (
                           <div key={i} className="h-5 md:h-6">{i + 1}</div>
-                        ))}
-                      </div>
+                                ))}
+                              </div>
 
                       <div className="flex-1 text-white overflow-x-auto">
                         <div className="h-5 md:h-6 text-blue-400">import {"{}"} useState {"{}"} from &quot;react&quot;;</div>
@@ -440,10 +523,10 @@ export default function Home() {
                         <div className="pl-4 h-5 md:h-6">const [skills, setSkills] = useState([]);</div>
                         <div className="pl-4 h-5 md:h-6 text-green-600">{/* Find perfect teammates based on skills */}</div>
                         <div className="pl-4 h-5 md:h-6">return <span className="text-yellow-300">&lt;MatchingUI skills={"{}"}skills{"}"} /&gt;</span>;</div>
-                                  </div>
-                                  </div>
+                                </div>
                                 </div>
                               </div>
+                            </div>
                               
                 {/* Feature Box - Team Matching */}
                 <div className="md:col-span-2">
@@ -455,14 +538,14 @@ export default function Home() {
                     {/* Simplified Depth Effect */}
                     <div className="absolute inset-0 overflow-hidden">
                       <div className="absolute -right-10 -bottom-10 w-40 h-40 rounded-full bg-blue-500/10 blur-xl"></div>
-                                      </div>
+                                        </div>
                     
                     {/* Content */}
                     <div className="relative z-10 flex flex-col h-full">
                       <div className="flex gap-3 items-center mb-3">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 flex items-center justify-center shadow-sm">
                           <span className="text-lg">👥</span>
-                                    </div>
+                                      </div>
                         <h3 className="text-xl font-bold text-white">
                           Team <span className="text-blue-300">Matching</span>
                         </h3>
@@ -477,14 +560,14 @@ export default function Home() {
                         <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500 transition-colors duration-300">
                           <svg className="w-4 h-4 text-blue-400 group-hover:text-white transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M5 12h14M12 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                                </div>
+                                  </svg>
                               </div>
                             </div>
+                                      </div>
                                 </div>
                               </div>
-                              </div>
-                            </div>
+                                  </div>
+                                </div>
           </section>
           
           {/* Chat Rooms Feature - Optimized */}
@@ -497,9 +580,9 @@ export default function Home() {
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
                   <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
                   <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                </div>
+                                        </div>
                 <div className="text-white/70 text-xs">chat_rooms.tsx</div>
-                                      </div>
+                                    </div>
               
               {/* Simplified Code View */}
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -521,8 +604,8 @@ export default function Home() {
                         <div className="pl-4 h-5 md:h-6">return <span className="text-yellow-300">&lt;MessageList roomId={"{}"}roomId{"{"} /&gt;</span>;</div>
                                   </div>
                                 </div>
-                                </div>
                               </div>
+                            </div>
 
                 {/* Feature Box - Chat Rooms */}
                 <div className="md:col-span-2">
@@ -534,19 +617,19 @@ export default function Home() {
                     {/* Simplified Depth Effect */}
                     <div className="absolute inset-0 overflow-hidden">
                       <div className="absolute -right-10 -bottom-10 w-40 h-40 rounded-full bg-purple-500/10 blur-xl"></div>
-                                </div>
+                      </div>
                     
                     {/* Content */}
                     <div className="relative z-10 flex flex-col h-full">
                       <div className="flex gap-3 items-center mb-3">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-purple-700 flex items-center justify-center shadow-sm">
                           <span className="text-lg">💬</span>
-                              </div>
+                    </div>
                         <h3 className="text-xl font-bold text-white">
                           Chat <span className="text-purple-300">Rooms</span>
                         </h3>
-                            </div>
-                      
+                  </div>
+
                       <p className="text-purple-100 text-sm leading-relaxed mb-auto">
                         Collaborate seamlessly with your team through dedicated chat rooms.
                       </p>
@@ -557,13 +640,13 @@ export default function Home() {
                           <svg className="w-4 h-4 text-purple-400 group-hover:text-white transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M5 12h14M12 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
-              </div>
             </div>
+        </div>
+      </div>
+                </div>
+              </div>
           </section>
           
           {/* Analytics Feature - Optimized */}
@@ -576,9 +659,9 @@ export default function Home() {
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
                   <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
                   <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                </div>
+                  </div>
                 <div className="text-white/70 text-xs">analytics.tsx</div>
-              </div>
+                  </div>
 
               {/* Simplified Code View */}
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -589,7 +672,7 @@ export default function Home() {
                         {Array.from({ length: 6 }).map((_, i) => (
                           <div key={i} className="h-5 md:h-6">{i + 1}</div>
                         ))}
-                  </div>
+                        </div>
                       
                       <div className="flex-1 text-white overflow-x-auto">
                         <div className="h-5 md:h-6 text-blue-400">import {"{}"} useMemo {"{}"} from &quot;react&quot;;</div>
@@ -598,8 +681,8 @@ export default function Home() {
                         <div className="pl-4 h-5 md:h-6">const data = useAnalyticsData(hackathonId);</div>
                         <div className="pl-4 h-5 md:h-6 text-green-600">{/* Real-time participation metrics */}</div>
                         <div className="pl-4 h-5 md:h-6">return <span className="text-yellow-300">&lt;DashboardUI data={"{}"}data{"{"} /&gt;</span>;</div>
+                        </div>
                       </div>
-                    </div>
                   </div>
                 </div>
 
@@ -613,18 +696,18 @@ export default function Home() {
                     {/* Simplified Depth Effect */}
                     <div className="absolute inset-0 overflow-hidden">
                       <div className="absolute -right-10 -bottom-10 w-40 h-40 rounded-full bg-emerald-500/10 blur-xl"></div>
-                    </div>
+                        </div>
                     
                     {/* Content */}
                     <div className="relative z-10 flex flex-col h-full">
                       <div className="flex gap-3 items-center mb-3">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-700 flex items-center justify-center shadow-sm">
                           <span className="text-lg">📊</span>
-                        </div>
+                          </div>
                         <h3 className="text-xl font-bold text-white">
                           Live <span className="text-emerald-300">Analytics</span>
                         </h3>
-                          </div>
+                        </div>
                       
                       <p className="text-emerald-100 text-sm leading-relaxed mb-auto">
                         Track participation and team formation with real-time data.
@@ -636,91 +719,61 @@ export default function Home() {
                           <svg className="w-4 h-4 text-emerald-400 group-hover:text-white transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M5 12h14M12 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
-                        </div>
-                      </div>
-                    </div>
+                  </div>
                 </div>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
         </div>
+      </section>
+    </div>
             </div>
             
-      {/* FAQ Section - Improved */}
-      <div className="w-full px-2 md:px-4 py-8 md:py-12">
+      {/* FAQ Section */}
+      <div className="w-full px-4 py-4 md:py-8">
         <div className="mx-auto max-w-7xl">
           <section>
-            <div className="bg-white/90 backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl md:rounded-3xl p-6 md:p-10 border border-white/20 relative overflow-hidden">
-              {/* Decorative Elements */}
-              <div className="absolute -top-28 -right-28 w-56 h-56 rounded-full bg-gradient-to-br from-[#1e1894]/10 to-[#4361ee]/5 blur-3xl"></div>
-              <div className="absolute -bottom-28 -left-28 w-56 h-56 rounded-full bg-gradient-to-tr from-[#4361ee]/10 to-[#1e1894]/5 blur-3xl"></div>
-              <div className="absolute top-1/4 right-1/4 w-24 h-24 border border-[#1e1894]/5 rounded-full opacity-30"></div>
-              <div className="absolute bottom-1/3 left-1/3 w-12 h-12 border border-[#4361ee]/10 rounded-full opacity-30"></div>
-              
-              {/* Grid Pattern */}
-              <div className="absolute inset-0 opacity-[0.02]"
-                style={{ 
-                  backgroundImage: `linear-gradient(to right, #1e1894 1px, transparent 1px),
-                                    linear-gradient(to bottom, #1e1894 1px, transparent 1px)`,
-                  backgroundSize: '40px 40px',
-                }}
-              />
-              
+            <div className="bg-white/90 backdrop-blur-md shadow-xl rounded-2xl p-3 md:p-6 border border-white/60 relative">
               {/* Section Header */}
-              <div className="relative z-10 text-center mb-10 md:mb-12">
-                <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-[#1e1894]/10 to-[#4361ee]/10 border border-[#1e1894]/10 mb-3">
-                  <span className="text-xs font-semibold bg-gradient-to-r from-[#1e1894] to-[#4361ee] bg-clip-text text-transparent">
-                    Knowledge Base
-                  </span>
-                </div>
-                
-                <h2 className="text-2xl md:text-4xl font-extrabold">
-                  <span className="bg-gradient-to-r from-[#1e1894] to-[#4361ee] bg-clip-text text-transparent">
-                    How Our Platform Stands Out
-                  </span>
+              <div className="text-center mb-4 md:mb-10">
+                <span className="inline-block text-xs bg-gradient-to-r from-[#1e1894]/90 to-[#4361ee]/90 text-white font-medium uppercase tracking-wider px-2.5 py-0.5 rounded-full mb-2">
+                  Knowledge Base
+                </span>
+                <h2 className="text-xl md:text-3xl font-extrabold text-[#1e1894]">
+                  How Our Platform Stands Out
                 </h2>
-                
-                <p className="text-gray-600 text-sm md:text-base max-w-2xl mx-auto mt-3">
+                <p className="text-gray-600 text-sm md:text-lg max-w-2xl mx-auto mt-2 md:mt-4">
                   Discover what makes DevDuos the perfect platform for your hackathon journey.
                 </p>
-                
-                <div className="w-16 h-1 bg-gradient-to-r from-[#1e1894] to-[#4361ee] rounded-full mx-auto mt-5 opacity-70"></div>
-          </div>
+              </div>
 
               {/* FAQ Items */}
-              <div className="space-y-5 md:space-y-6 relative z-10 max-w-4xl mx-auto">
-                {faqCategories.find(category => category.title === "How Our Hackathon Platform Stands Out")?.questions.map((faq, index) => (
+              <div className="space-y-2 md:space-y-4 max-w-4xl mx-auto">
+                {faqCategories.find(category => category.title === "How Our Hackathon Platform Stands Out")?.questions.map((faq) => (
                   <div
                     key={faq.id}
-                    className="group transition-all duration-300 hover:translate-y-[-2px]"
+                    className="bg-white/70 backdrop-blur-md rounded-lg p-2.5 md:p-4 shadow-sm border border-gray-100"
                   >
-                    <div className="relative">
-                      {/* Create a subtle gradient highlight for each item */}
-                      <div className={`absolute inset-0 ${index % 2 === 0 ? 'bg-gradient-to-r from-[#1e1894]/5' : 'bg-gradient-to-l from-[#4361ee]/5'} to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10`}></div>
-                      
-                      <div className="backdrop-blur-sm border border-white/10 rounded-xl hover:shadow-md transition-all duration-300">
-                        <FAQDropdown faq={faq} />
-                      </div>
-                    </div>
-                </div>
-              ))}
-            </div>
+                    <FAQDropdown faq={faq} />
+                  </div>
+                ))}
+              </div>
               
               {/* Bottom Explore Button */}
-              <div className="mt-10 md:mt-14 text-center relative z-10">
+              <div className="mt-4 md:mt-10 text-center">
                 <Link 
                   href="/faq"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#1e1894] to-[#4361ee] text-white rounded-full text-base font-bold
-                           shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+                  className="inline-flex items-center gap-1.5 px-3 md:px-6 py-2 md:py-3 bg-gradient-to-r from-[#1e1894] to-[#4361ee] text-white rounded-full text-xs md:text-base font-bold
+                           shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   <span>Explore All FAQs</span>
-                  <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <svg className="w-3 h-3 md:w-4 md:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </Link>
-        </div>
-      </div>
+              </div>
+            </div>
           </section>
         </div>
       </div>
