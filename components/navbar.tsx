@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 
 interface NavLinkProps {
@@ -56,10 +57,16 @@ export default function Navbar() {
           bg-white/90 backdrop-blur-sm border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="bg-gradient-to-r from-[#1e1894] to-[#4361ee] w-8 h-8 rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
-              <span className="text-white font-bold text-xs">D²</span>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
+              <Image 
+                src="/logo123.png" 
+                alt="DevKstra Logo" 
+                width={32} 
+                height={32} 
+                className="rounded-full"
+              />
             </div>
-            <span className="text-[#1e1894] text-xl font-bold bg-gradient-to-r from-[#1e1894] to-[#4361ee] bg-clip-text text-transparent group-hover:tracking-wide transition-all duration-300">DevDuos</span>
+            <span className="text-[#1e1894] text-xl font-bold bg-gradient-to-r from-[#1e1894] to-[#4361ee] bg-clip-text text-transparent group-hover:tracking-wide transition-all duration-300">DevKstra</span>
           </Link>
 
           {/* Desktop Navigation */}

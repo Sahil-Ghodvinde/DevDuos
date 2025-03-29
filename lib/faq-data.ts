@@ -212,7 +212,7 @@ export const faqCategories = [
     questions: [
       {
         id: '26',
-        question: 'How Does DevDuos Help You Find the Right Hackathon?',
+        question: 'How Does DevKstra Help You Find the Right Hackathon?',
         category: 'Platform',
         link: '/faq/platform-find-hackathon',
         relatedQuestions: ['27', '28', '29']
@@ -233,7 +233,7 @@ export const faqCategories = [
       },
       {
         id: '29',
-        question: 'Why Should You Use DevDuos Instead of Searching Manually?',
+        question: 'Why Should You Use DevKstra Instead of Searching Manually?',
         category: 'Platform',
         link: '/faq/platform-benefits',
         relatedQuestions: ['26', '27', '28']

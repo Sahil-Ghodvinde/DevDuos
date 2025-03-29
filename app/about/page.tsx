@@ -46,7 +46,7 @@ export default function AboutUs() {
                     Our Story
                   </span>
                   <h1 className="text-4xl md:text-6xl font-extrabold text-[#1e1894] tracking-tight mt-2">
-                    About DevDuos
+                    About DevKstra
                   </h1>
                   <p className="text-gray-600 text-lg max-w-2xl mx-auto mt-6">
                     Created by developers, for developers – building the ultimate hackathon platform
@@ -56,10 +56,10 @@ export default function AboutUs() {
                 {/* Company Logo and Name */}
                 <div className="flex items-center justify-center gap-6 mb-6">
                   <div className="w-24 h-24 bg-gradient-to-br from-[#1e1894] to-[#4361ee] rounded-2xl flex items-center justify-center shadow-xl transform rotate-3">
-                    <span className="text-white text-4xl font-bold">DD</span>
+                    <span className="text-white text-4xl font-bold">DK</span>
                   </div>
                   <div className="text-left">
-                    <h2 className="text-3xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-[#1e1894] to-[#4361ee]">DevDuos</h2>
+                    <h2 className="text-3xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-[#1e1894] to-[#4361ee]">DevKstra</h2>
                     <p className="text-gray-600 text-lg">Est. January 2024</p>
                   </div>
                 </div>
@@ -185,7 +185,7 @@ export default function AboutUs() {
                     Our History
                   </span>
                   <h2 className="text-3xl font-extrabold text-[#1e1894]">
-                    The DevDuos Journey
+                    The DevKstra Journey
                   </h2>
                 </div>
                 
@@ -195,7 +195,7 @@ export default function AboutUs() {
                     {
                       date: "January 2024",
                       title: "The Beginning",
-                      content: "Two engineering students faced a common challenge: finding the right teammates for hackathons. This sparked the idea for DevDuos.",
+                      content: "Two engineering students faced a common challenge: finding the right teammates for hackathons. This sparked the idea for DevKstra.",
                       icon: "💡"
                     },
                     {
@@ -206,7 +206,7 @@ export default function AboutUs() {
                     },
                     {
                       date: "March 2024",
-                      title: "DevDuos Spaces Launch",
+                      title: "DevKstra Spaces Launch",
                       content: "Launched our community-driven forum where innovators can connect, collaborate, and seek guidance.",
                       icon: "🚀"
                     },

@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 
 export default function Footer() {
   return (
@@ -8,10 +9,16 @@ export default function Footer() {
           {/* Brand & Story Section */}
           <div className="md:col-span-1 lg:col-span-2">
             <div className="flex items-center mb-4">
-              <div className="w-8 h-8 rounded-md bg-gradient-to-r from-[#1e1894] to-[#4361ee] flex items-center justify-center mr-2">
-                <span className="text-white font-bold">D²</span>
+              <div className="w-8 h-8 rounded-md bg-gradient-to-r from-[#eeeeee] to-[#d7d7d7] flex items-center justify-center mr-2">
+                <Image 
+                  src="/logo123.png" 
+                  alt="DevKstra Logo" 
+                  width={24} 
+                  height={24} 
+                  className="rounded-sm"
+                />
               </div>
-              <span className="text-xl font-bold text-gray-800">DevDuos</span>
+              <span className="text-xl font-bold text-gray-800">DevKstra</span>
             </div>
             
             <p className="text-sm text-gray-600 mb-4 leading-relaxed max-w-md">
@@ -78,7 +85,7 @@ export default function Footer() {
                 <Link href="/contact" className="text-gray-600 hover:text-[#1e1894] transition-colors duration-200 text-sm">Contact Us</Link>
               </li>
               <li>
-                <a href="mailto:support@devduos.com" className="text-gray-600 hover:text-[#1e1894] transition-colors duration-200 text-sm">support@devduos.com</a>
+                <a href="mailto:support@devkstra.com" className="text-gray-600 hover:text-[#1e1894] transition-colors duration-200 text-sm">support@devkstra.com</a>
               </li>
             </ul>
           </div>
@@ -87,7 +94,7 @@ export default function Footer() {
         {/* Bottom Bar with Copyright */}
         <div className="mt-12 pt-6 border-t border-gray-300">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-600 text-sm">© {new Date().getFullYear()} DevDuos. All rights reserved.</p>
+            <p className="text-gray-600 text-sm">© {new Date().getFullYear()} DevKstra. All rights reserved.</p>
             <p className="text-gray-500 text-xs mt-2 md:mt-0">
               Made with 💙 by passionate developers for the hackathon community
             </p>
