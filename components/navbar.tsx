@@ -1,9 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
+import { useAuth } from "@/app/context/AuthContext"
+import UserAvatar from "./UserAvatar"
 
 interface NavLinkProps {
   href: string;
@@ -21,17 +23,11 @@ interface MobileNavLinkProps {
 
 export default function Navbar() {
   const pathname = usePathname()
-  const [activeLink, setActiveLink] = useState(() => {
-    if (typeof window !== "undefined") {
-      const path = window.location.pathname
-      if (path === "/") return "Hackathons"
-      if (path === "/login" || path.includes("login")) return "Login"
-      if (path.includes("/soon")) return "Login"
-      if (path === "/faq") return "FAQ"
-    }
-    return "Hackathons"
-  })
+  const { user, signOut } = useAuth()
+  const [activeLink, setActiveLink] = useState("Hackathons")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+  const profileMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (pathname === "/") {
@@ -44,17 +40,44 @@ export default function Navbar() {
       setActiveLink("FAQ")
     } else if (pathname === "/about") {
       setActiveLink("About")
+    } else if (pathname === "/profile") {
+      setActiveLink("Profile") 
+    } else if (pathname === "/dashboard") {
+      setActiveLink("Dashboard")
     }
   }, [pathname])
+
+  useEffect(() => {
+    // Close profile dropdown when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
   }
 
+  const toggleProfileMenu = () => {
+    setIsProfileMenuOpen(!isProfileMenuOpen)
+  }
+
+  const handleSignOut = async () => {
+    await signOut()
+    setIsProfileMenuOpen(false)
+  }
+
   return (
     <div className="w-full px-4 pt-4">
       <nav className="mx-auto max-w-7xl rounded-2xl py-3 px-4 md:py-4 md:px-6 transition-all duration-300 
-          bg-white/90 backdrop-blur-sm border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          bg-white/90 backdrop-blur-sm border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] z-40 relative">
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300">
@@ -89,12 +112,78 @@ export default function Navbar() {
               isActive={activeLink === "FAQ"} 
               onClick={() => setActiveLink("FAQ")}
             />
-            <NavLink 
-              href="/login" 
-              label="Signin" 
-              isActive={activeLink === "Login"} 
-              onClick={() => setActiveLink("Login")}
-            />
+            
+            {/* Login/Profile Button */}
+            {user ? (
+              <div className="relative z-50" ref={profileMenuRef}>
+                <button
+                  onClick={toggleProfileMenu}
+                  className="flex items-center space-x-1 px-3 py-1.5 rounded-full text-sm font-medium bg-gray-50 text-gray-700 hover:bg-gray-100 transition-all duration-200"
+                >
+                  <UserAvatar user={user} size={24} />
+                  <span className="max-w-[80px] truncate">
+                    {user.user_metadata?.full_name || user.email?.split('@')[0] || "Profile"}
+                  </span>
+                  <svg 
+                    className={`w-3 h-3 text-gray-500 transition-transform duration-200 ${isProfileMenuOpen ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Profile Dropdown */}
+                {isProfileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-50 border border-gray-100">
+                    <Link 
+                      href="/profile" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#1e1894]"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      <div className="flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        View Profile
+                      </div>
+                    </Link>
+                    <Link 
+                      href="/dashboard" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#1e1894]"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      <div className="flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Dashboard
+                      </div>
+                    </Link>
+                    <div className="border-t border-gray-100 my-1"></div>
+                    <button 
+                      onClick={handleSignOut}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <div className="flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Sign Out
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <NavLink 
+                href="/login" 
+                label="Sign In" 
+                isActive={activeLink === "Login"} 
+                onClick={() => setActiveLink("Login")}
+              />
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -123,7 +212,7 @@ export default function Navbar() {
 
         {/* Mobile Navigation */}
         <div 
-          className={`md:hidden mt-3 overflow-hidden transition-all duration-200 ease-in-out ${
+          className={`md:hidden mt-3 overflow-hidden transition-all duration-200 ease-in-out z-40 ${
             isMobileMenuOpen ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'
           }`}
         >
@@ -155,15 +244,50 @@ export default function Navbar() {
                 setIsMobileMenuOpen(false)
               }}
             />
-            <MobileNavLink 
-              href="/login" 
-              label="Signin" 
-              isActive={activeLink === "Login"} 
-              onClick={() => {
-                setActiveLink("Login")
-                setIsMobileMenuOpen(false)
-              }}
-            />
+            
+            {user ? (
+              <>
+                <MobileNavLink 
+                  href="/profile" 
+                  label="Profile" 
+                  isActive={activeLink === "Profile"} 
+                  onClick={() => {
+                    setActiveLink("Profile")
+                    setIsMobileMenuOpen(false)
+                  }}
+                />
+                <MobileNavLink 
+                  href="/dashboard" 
+                  label="Dashboard" 
+                  isActive={activeLink === "Dashboard"} 
+                  onClick={() => {
+                    setActiveLink("Dashboard")
+                    setIsMobileMenuOpen(false)
+                  }}
+                />
+                <button
+                  className="w-full px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 text-left transition-all duration-200"
+                  onClick={() => {
+                    handleSignOut()
+                    setIsMobileMenuOpen(false)
+                  }}
+                >
+                  <div className="flex items-center">
+                    <span>Sign Out</span>
+                  </div>
+                </button>
+              </>
+            ) : (
+              <MobileNavLink 
+                href="/login" 
+                label="Sign In" 
+                isActive={activeLink === "Login"} 
+                onClick={() => {
+                  setActiveLink("Login")
+                  setIsMobileMenuOpen(false)
+                }}
+              />
+            )}
           </div>
         </div>
       </nav>

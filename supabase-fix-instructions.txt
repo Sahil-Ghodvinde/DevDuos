@@ -1,0 +1,6 @@
+Instructions for running Supabase SQL migrations:
+1. Go to your Supabase dashboard -> SQL Editor -> New query
+2. Copy the contents of each migration file and run them one by one
+3. Run these files in this order:
+   - 20240716_check_and_create_user_profiles.sql
+   - 20240716_fix_rls_policies.sql

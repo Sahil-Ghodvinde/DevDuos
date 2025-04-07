@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 // Social auth icons
 const GoogleIcon = () => (
@@ -65,30 +67,73 @@ export default function Signup() {
     }))
   }
 
+  const router = useRouter();
+
+  // Update handleSocialAuth
   const handleSocialAuth = async (provider: 'google' | 'github') => {
-    if (!formData.username.trim()) {
-      alert('Please enter a username before continuing')
-      return
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth-success?type=signup`
+        }
+      });
+      
+      if (error) throw error;
+      console.log('OAuth initiated:', data);
+    } catch (error) {
+      console.error('Error signing in:', error);
+      alert('Error signing in. Please try again.');
     }
-    console.log(`Authenticating with ${provider}, username: ${formData.username}`)
-  }
-
+  };
+  
+  // Update handleSubmit
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     
-    if (!formData.username || !formData.full_name || !formData.email || !formData.phone_number || !formData.password || !formData.confirmPassword) {
-      alert('Please fill in all required fields')
-      return
-    }
-
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match')
-      return
+      alert('Passwords do not match. Please try again.');
+      return;
     }
-
-    console.log('Submitting form data:', formData)
-    setShowSuccessMessage(true)
-  }
+    
+    try {
+      // 1. Sign up with email/password
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            username: formData.username,
+            full_name: formData.full_name
+          }
+        }
+      });
+      
+      if (authError) throw authError;
+      
+      // 2. Store additional user data in profiles table
+      if (authData?.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            username: formData.username,
+            full_name: formData.full_name,
+            email: formData.email,
+            phone_number: formData.phone_number
+          });
+        
+        if (profileError) throw profileError;
+      }
+      
+      // Redirect to auth success page instead of showing success message
+      router.push('/auth-success?type=signup');
+      
+    } catch (error) {
+      console.error('Error signing up:', error);
+      alert('Error creating account. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">

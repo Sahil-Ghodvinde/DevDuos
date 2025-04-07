@@ -1,5 +1,786 @@
-import { redirect } from 'next/navigation';
+"use client"
+
+import { useState, useEffect, useMemo } from "react"
+import HackathonCard from "@/components/hackathon-card"
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
+import LoadingScreen from "@/components/loading-screen"
+import { getHackathons } from "@/lib/hackathons"
+import { faqCategories } from '@/lib/faq-data'
+import FAQDropdown from '@/components/faq-dropdown'
+import Link from "next/link"
+
+// Define the Hackathon interface
+interface Hackathon {
+  id: string
+  title: string
+  description: string
+  image?: string
+  location: string
+  date: string
+  closes: string
+  mode?: "Online" | "Offline" | "Hybrid"
+  theme?: string
+  status?: "OPEN" | "LIVE" | "CLOSED"
+  participants?: number
+  organizer?: string
+  sourcePlatform?: string
+}
 
 export default function Home() {
-  redirect('/pre-launch');
+  const [isLoading, setIsLoading] = useState(true)
+  const [displayedHackathons, setDisplayedHackathons] = useState(4)
+  
+  const [hackathons, setHackathons] = useState<Hackathon[]>([])
+  const [selectedMode, setSelectedMode] = useState<string>("All")
+  const [selectedPlatform, setSelectedPlatform] = useState<string>("All")
+  const [dateSort, setDateSort] = useState<string>("none")
+  const itemsPerPage = 4
+
+  // Filter and sort hackathons
+  const filteredHackathons = useMemo(() => {
+    let filtered = [...hackathons]
+
+    // Apply mode filter
+    if (selectedMode !== "All") {
+      filtered = filtered.filter(hackathon => 
+        hackathon.mode?.toLowerCase() === selectedMode.toLowerCase()
+      )
+    }
+
+    // Apply platform filter
+    if (selectedPlatform !== "All") {
+      filtered = filtered.filter(hackathon => 
+        hackathon.sourcePlatform?.toLowerCase() === selectedPlatform.toLowerCase()
+      )
+    }
+
+    // Apply date sorting
+    if (dateSort !== "none") {
+      filtered.sort((a, b) => {
+        // Get the dates from hackathon objects
+        const dateA = a.date ? new Date(a.date) : null
+        const dateB = b.date ? new Date(b.date) : null
+        
+        // Handle missing or invalid dates
+        if (!dateA || isNaN(dateA.getTime())) return 1
+        if (!dateB || isNaN(dateB.getTime())) return -1
+        
+        // Sort based on selected option
+        if (dateSort === "asc") {
+          return dateA.getTime() - dateB.getTime()
+        } else if (dateSort === "desc") {
+          return dateB.getTime() - dateA.getTime()
+        }
+        return 0
+      })
+    }
+
+    return filtered
+  }, [hackathons, selectedMode, selectedPlatform, dateSort])
+
+  useEffect(() => {
+    // Fetch hackathons from Supabase
+    async function fetchHackathons() {
+      try {
+        // Check if Supabase is properly configured
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+          console.error('Supabase configuration is missing');
+          setIsLoading(false);
+          return;
+        }
+
+        const hackathonsData = await getHackathons()
+        if (hackathonsData) {
+          setHackathons(hackathonsData)
+        } else {
+          console.error('Failed to fetch hackathons');
+          setHackathons([])
+        }
+        setIsLoading(false)
+      } catch (error) {
+        console.error("Error fetching hackathons:", error)
+        setHackathons([])
+      setIsLoading(false)
+      }
+    }
+
+    fetchHackathons()
+  }, [])
+
+  
+
+  const handleSeeMore = () => {
+    const nextCount = Math.min(displayedHackathons + itemsPerPage, hackathons.length)
+    setDisplayedHackathons(nextCount)
+  }
+
+  if (isLoading) {
+    return <LoadingScreen onLoadingComplete={() => setIsLoading(false)} />
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 relative">
+      {/* Background Patterns & Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        {/* Subtle Grain Texture */}
+        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            filter: 'contrast(170%) brightness(150%)',
+          }} />
+        </div>
+        
+        {/* Large Decorative Elements */}
+        <div className="absolute top-[10%] right-[5%] w-[600px] h-[600px] rounded-full bg-[#1e1894]/5 blur-3xl"></div>
+        <div className="absolute top-[40%] left-[5%] w-[500px] h-[500px] rounded-full bg-[#1e1894]/3 blur-3xl"></div>
+        <div className="absolute bottom-[10%] right-[15%] w-[400px] h-[400px] rounded-full bg-[#4361ee]/3 blur-3xl"></div>
+        
+        {/* Grid Lines */}
+        <div className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: `linear-gradient(to right, #1e1894 1px, transparent 1px),
+                              linear-gradient(to bottom, #1e1894 1px, transparent 1px)`,
+            backgroundSize: '80px 80px',
+          }}
+        ></div>
+      </div>
+
+      <Navbar />
+
+      {/* Hero Section - Optimized Design */}
+      <div className="w-full px-2 md:px-4 pt-4 md:pt-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="bg-white shadow-md rounded-2xl md:rounded-3xl border border-gray-100 overflow-hidden relative">
+            {/* Static Background - No animations */}
+            <div className="absolute inset-0 overflow-hidden">
+              {/* Static gradient accent - replaces animated circles */}
+              <div className="absolute -top-[10%] -right-[10%] w-[70%] h-[70%] rounded-full bg-gradient-to-r from-[#1e1894]/5 to-[#4361ee]/10 blur-2xl opacity-50" />
+              <div className="absolute -bottom-[20%] -left-[10%] w-[60%] h-[60%] rounded-full bg-gradient-to-r from-[#4361ee]/10 to-[#1e1894]/5 blur-2xl opacity-40" />
+              
+              {/* Simpler grid pattern with lower opacity */}
+              <div className="absolute inset-0 opacity-[0.02]"
+                style={{
+                  backgroundImage: `linear-gradient(to right, #1e1894 1px, transparent 1px),
+                                    linear-gradient(to bottom, #1e1894 1px, transparent 1px)`,
+                  backgroundSize: '40px 40px',
+                }}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-5 relative z-10">
+              {/* Left Column - Text Content */}
+              <div className="p-4 md:p-6 col-span-1 lg:col-span-2 flex flex-col justify-center">
+                <div className="space-y-4 md:space-y-5">
+                  <div>
+                    <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-[#1e1894]/10 to-[#4361ee]/10 border border-[#1e1894]/20 mb-2">
+                      <span className="text-xs font-semibold bg-gradient-to-r from-[#1e1894] to-[#4361ee] bg-clip-text text-transparent">
+                        The Ultimate Hackathon Experience
+                      </span>
+                    </div>
+                    
+                    <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight">
+                      <span className="block bg-gradient-to-r from-[#1e1894] to-[#4361ee] bg-clip-text text-transparent">
+                        Find Your Perfect
+                      </span>
+                      <span className="block text-[#1e1894]">
+                        Hackathon & Team
+                      </span>
+                    </h1>
+                    
+                    <p className="mt-2 md:mt-3 text-gray-600 text-sm max-w-md leading-relaxed">
+                      Connect with teammates, discover events, and showcase your skills all in one place.
+                    </p>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
+                    <button
+                      onClick={() => {
+                        const hackathonSection = document.querySelector('.hackathon-section');
+                        hackathonSection?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="px-5 py-2.5 bg-gradient-to-r from-[#1e1894] to-[#4361ee] text-white rounded-xl text-sm font-bold shadow-lg hover:shadow-xl hover:shadow-[#1e1894]/30 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
+                    >
+                      Apply Now
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </button>
+                    
+                    <button
+                      onClick={() => window.location.href = '/soon'}
+                      className="px-5 py-2.5 bg-white border-2 border-[#1e1894]/20 text-[#1e1894] rounded-xl text-sm font-bold shadow-md hover:bg-[#1e1894]/5 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292V15M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      Find Teammates
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <div className="flex -space-x-2">
+                      {[...Array(4)].map((_, i) => (
+                        <div 
+                          key={i} 
+                          className="w-6 h-6 md:w-7 md:h-7 rounded-full border border-white shadow-sm bg-gradient-to-r from-[#1e1894] to-[#4361ee] flex items-center justify-center"
+                        >
+                          <span className="text-white text-[10px] font-bold">
+                            {String.fromCharCode(65 + i)}
+                          </span>
+                        </div>
+                ))}
+              </div>
+                    <div>
+                      <span className="text-xs text-gray-600">
+                        <span className="font-bold text-[#1e1894]">2,000+</span> developers
+                      </span>
+            </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Code Editor Visual - Enhanced */}
+              <div className="col-span-1 lg:col-span-3 p-4 lg:py-6 lg:pr-6">
+                <div className="bg-gradient-to-r from-[#1e1894] to-[#4361ee] rounded-xl overflow-hidden h-[220px] md:h-[260px] lg:h-[280px] relative shadow-2xl shadow-[#1e1894]/20">
+                  {/* Enhanced Grid Background */}
+                  <div className="absolute inset-0 opacity-10"
+                    style={{
+                      backgroundImage: `linear-gradient(to right, white 1px, transparent 1px),
+                                        linear-gradient(to bottom, white 1px, transparent 1px)`,
+                      backgroundSize: '30px 30px',
+                    }}
+                  />
+                  
+                  {/* Code Editor - Enhanced */}
+                  <div className="relative z-10 mx-auto w-[90%] max-w-[400px] mt-5 md:mt-8 transform hover:-translate-y-1 transition-all duration-500">
+                    <div className="bg-[#1E1E1E] rounded-lg shadow-2xl overflow-hidden border border-white/20">
+                      {/* Editor Bar - Enhanced */}
+                      <div className="bg-[#252525] border-b border-gray-800 flex items-center px-3 py-2">
+                        <div className="flex gap-1.5">
+                          <div className="w-[12px] h-[12px] rounded-full bg-red-500 hover:bg-red-400 transition-colors duration-200"></div>
+                          <div className="w-[12px] h-[12px] rounded-full bg-yellow-500 hover:bg-yellow-400 transition-colors duration-200"></div>
+                          <div className="w-[12px] h-[12px] rounded-full bg-green-500 hover:bg-green-400 transition-colors duration-200"></div>
+                        </div>
+                        <div className="ml-auto text-white/60 text-[10px] font-mono flex items-center gap-2">
+                          <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                          hackathon.tsx
+                        </div>
+                      </div>
+                      
+                      {/* Code - Enhanced syntax highlighting */}
+                      <div className="p-3 text-[10px] md:text-xs font-mono">
+                        <div className="flex">
+                          <div className="text-gray-500 mr-3 select-none">
+                            <div>1</div>
+                            <div>2</div>
+                            <div>3</div>
+                            <div>4</div>
+                            <div>5</div>
+                            <div>6</div>
+                            <div>7</div>
+                          </div>
+                          
+                          <div className="text-white">
+                            <div><span className="text-pink-400">import</span> <span className="text-blue-300">{"{"}</span> useState <span className="text-blue-300">{"}"}</span> <span className="text-pink-400">from</span> <span className="text-green-300">&quot;react&quot;</span>;</div>
+                            <div>&nbsp;</div>
+                            <div>
+                              <span className="text-pink-400">function</span> <span className="text-yellow-300">HackathonApp</span>() <span className="text-blue-300">{"{"}</span> 
+                            </div>
+                            <div className="pl-4"><span className="text-pink-400">const</span> [<span className="text-yellow-300">team</span>, <span className="text-yellow-300">setTeam</span>] = <span className="text-blue-400">useState</span>([]);</div>
+                            <div className="pl-4 text-green-500">{/* Find your perfect team with DevDuos! */}</div>
+                            <div className="pl-4"><span className="text-pink-400">return</span> <span className="text-blue-300">&lt;</span><span className="text-orange-300">DevHackathon</span> <span className="text-purple-300">teamMembers</span>=<span className="text-blue-300">{"{"}</span>team<span className="text-blue-300">{"}"}</span> <span className="text-blue-300">/&gt;</span>;</div>
+                            <div><span className="text-blue-300">{"}"}</span>;</div>
+                          </div>
+                        </div>
+                        
+                        {/* Animated cursor */}
+                        <div className="absolute bottom-[48px] left-[158px] h-[14px] w-1.5 bg-white/70 animate-blink"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Enhanced Tooltips */}
+                  <div className="absolute bottom-4 left-4 z-20 bg-black/40 backdrop-blur-md border border-white/30 rounded-lg p-2.5 text-[9px] md:text-xs text-white w-[110px] md:w-[130px] shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-r from-[#1e1894] to-[#4361ee] flex items-center justify-center text-xs shadow-inner">
+                        🚀
+                      </div>
+                      <span className="font-medium">Hack</span>
+                    </div>
+                    <div className="text-white/90 text-[8px] md:text-[10px]">Join top hackathons worldwide</div>
+                  </div>
+                  
+                  <div className="absolute top-4 right-4 z-20 bg-black/40 backdrop-blur-md border border-white/30 rounded-lg p-2.5 text-[9px] md:text-xs text-white w-[110px] md:w-[130px] shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-r from-[#1e1894] to-[#4361ee] flex items-center justify-center text-xs shadow-inner">
+                        🔍
+                      </div>
+                      <span className="font-medium">Connect</span>
+                    </div>
+                    <div className="text-white/90 text-[8px] md:text-[10px]">Find skilled teammates</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Hackathon Listing Section */}
+      <div className="w-full px-2 md:px-4 hackathon-section">
+        <div className="mx-auto max-w-7xl">
+          <section className="py-2 md:py-4">
+            <div className="bg-gradient-to-b from-white to-gray-50 backdrop-blur-md shadow-xl rounded-2xl md:rounded-3xl p-4 md:p-8 border border-gray-100">
+              {/* Section Header with Decorative Elements */}
+              <div className="relative mb-8">
+                {/* Background Decorative Elements */}
+                <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full bg-[#1e1894]/5 blur-2xl"></div>
+                <div className="absolute -bottom-4 right-10 w-16 h-16 rounded-full bg-[#4361ee]/5 blur-xl"></div>
+                
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4 relative z-10">
+                  <div>
+                    <span className="text-sm text-[#1e1894]/80 font-medium uppercase tracking-wider">Discover & Participate</span>
+                    <h2 className="text-2xl md:text-4xl font-extrabold text-[#1e1894] mt-1">
+                      Upcoming <span className="relative inline-block">
+                        Hackathons
+                        <span className="absolute bottom-0 left-0 w-full h-[6px] bg-[#1e1894]/10 -z-10 rounded-full"></span>
+                      </span>
+                    </h2>
+                  </div>
+                  
+                  <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full md:w-auto">
+                    {/* Mode Filter */}
+                    <div className="relative w-full md:w-[200px]">
+                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#1e1894] z-10">
+                        <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                        </svg>
+                      </div>
+                      <select 
+                        className="w-full bg-white border-2 border-gray-200 rounded-xl pl-10 pr-10 py-3
+                                   appearance-none focus:outline-none focus:border-[#1e1894] focus:ring-2 focus:ring-[#1e1894]/20
+                                 transition-all duration-300 text-sm md:text-base font-medium shadow-sm"
+                        value={selectedMode}
+                        onChange={(e) => {
+                          setSelectedMode(e.target.value)
+                          setDisplayedHackathons(4)
+                        }}
+                      >
+                        <option value="All">All Modes</option>
+                        <option value="Online">Online Only</option>
+                        <option value="offline">In-Person Only</option>
+                        <option value="Hybrid">Hybrid Events</option>
+                  </select>
+                    </div>
+
+                    {/* Platform Filter */}
+                    <div className="relative w-full md:w-[200px]">
+                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#1e1894] z-10">
+                        <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                      </div>
+                      <select 
+                        className="w-full bg-white border-2 border-gray-200 rounded-xl pl-10 pr-10 py-3
+                                 appearance-none focus:outline-none focus:border-[#1e1894] focus:ring-2 focus:ring-[#1e1894]/20
+                                 transition-all duration-300 text-sm md:text-base font-medium shadow-sm"
+                        value={selectedPlatform}
+                        onChange={(e) => {
+                          setSelectedPlatform(e.target.value)
+                          setDisplayedHackathons(4)
+                        }}
+                      >
+                        <option value="All">All Platforms</option>
+                        <option value="Devfolio">Devfolio</option>
+                        <option value="Devpost">Devpost</option>
+                        <option value="Unstop">Unstop</option>
+                        <option value="HackerEarth">HackerEarth</option>
+                        <option value="Kaggle">Kaggle</option>
+                        <option value="mlh">MLH</option>
+                      </select>
+                    </div>
+
+                    {/* Date Sort Filter */}
+                    <div className="relative w-full md:w-[200px]">
+                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#1e1894] z-10">
+                        <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                      </div>
+                      <select 
+                        className="w-full bg-white border-2 border-gray-200 rounded-xl pl-10 pr-10 py-3
+                                 appearance-none focus:outline-none focus:border-[#1e1894] focus:ring-2 focus:ring-[#1e1894]/20
+                                 transition-all duration-300 text-sm md:text-base font-medium shadow-sm"
+                        value={dateSort}
+                        onChange={(e) => {
+                          setDateSort(e.target.value)
+                          setDisplayedHackathons(4)
+                        }}
+                      >
+                        <option value="none">Default Order</option>
+                        <option value="asc">Earliest First</option>
+                        <option value="desc">Latest First</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hackathon Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 min-h-[400px]">
+                {filteredHackathons.slice(0, displayedHackathons).map((hackathon, index) => (
+                  <div
+                    key={hackathon.id}
+                    className="opacity-0 animate-fade-in"
+                    style={{
+                      animationDelay: `${index * 50}ms`,
+                      animationFillMode: 'forwards'
+                    }}
+                  >
+                    <HackathonCard hackathon={hackathon} />
+                  </div>
+                ))}
+              </div>
+
+              {/* Load More Button */}
+              {displayedHackathons < filteredHackathons.length && (
+                <div className="text-center mt-8 md:mt-12">
+                  <button
+                    onClick={handleSeeMore}
+                    className="px-8 py-3 bg-gradient-to-r from-[#1e1894] to-[#4361ee] text-white rounded-full text-base font-bold
+                             shadow-lg shadow-[#1e1894]/20 hover:shadow-xl hover:shadow-[#1e1894]/30
+                             hover:translate-y-[-2px] transition-all duration-300"
+                  >
+                    <span className="flex items-center gap-2">
+                      Load More Hackathons
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+              )}
+              
+              {/* Empty State Message */}
+              {filteredHackathons.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-16 h-16 bg-[#1e1894]/10 rounded-full flex items-center justify-center mb-4">
+                    <svg className="w-8 h-8 text-[#1e1894]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">No hackathons found</h3>
+                  <p className="text-gray-600 max-w-md">We couldn&apos;t find any hackathons matching your criteria. Try adjusting your filters or check back later.</p>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* Code Editor Style Sections - Interactive Features - Optimize performance */}
+      <div className="w-full px-2 md:px-4">
+        <div className="mx-auto max-w-7xl">
+          {/* Section Title */}
+          <div className="text-center mb-8">
+            <span className="text-sm text-[#1e1894]/80 font-medium uppercase tracking-wider">Core Features</span>
+            <h2 className="text-2xl md:text-4xl font-extrabold text-[#1e1894] mt-1">
+              Powerful <span className="relative inline-block">
+                Developer Tools
+                <span className="absolute bottom-0 left-0 w-full h-[6px] bg-[#1e1894]/10 -z-10 rounded-full"></span>
+              </span>
+                </h2>
+                    </div>
+
+          {/* Team Matching Feature - Optimized */}
+          <section className="py-2 md:py-3">
+            <div 
+              className="bg-[#1e1e1e] shadow-md rounded-2xl md:rounded-3xl p-3 md:p-6 overflow-hidden max-w-5xl mx-auto"
+            >
+              <div className="flex items-center gap-2 mb-3 border-b border-gray-700 pb-2">
+                <div className="flex space-x-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                                  </div>
+                <div className="text-white/70 text-xs">team_matching.tsx</div>
+                              </div>
+                              
+              {/* Simplified Code View */}
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="md:col-span-3">
+                  <div className="text-xs md:text-sm font-mono">
+                    <div className="flex">
+                      <div className="text-gray-500 w-6 md:w-8 flex-shrink-0 select-none">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="h-5 md:h-6">{i + 1}</div>
+                                ))}
+                              </div>
+
+                      <div className="flex-1 text-white overflow-x-auto">
+                        <div className="h-5 md:h-6 text-blue-400">import {"{}"} useState {"{}"} from &quot;react&quot;;</div>
+                        <div className="h-5 md:h-6">&nbsp;</div>
+                        <div className="h-5 md:h-6"><span className="text-purple-400">function</span> <span className="text-yellow-300">TeamMatching</span>() {"{"}{"}"}</div>
+                        <div className="pl-4 h-5 md:h-6">const [skills, setSkills] = useState([]);</div>
+                        <div className="pl-4 h-5 md:h-6 text-green-600">{/* Find perfect teammates based on skills */}</div>
+                        <div className="pl-4 h-5 md:h-6">return <span className="text-yellow-300">&lt;MatchingUI skills={"{}"}skills{"}"} /&gt;</span>;</div>
+                                </div>
+                                </div>
+                              </div>
+                            </div>
+                              
+                {/* Feature Box - Team Matching */}
+                <div className="md:col-span-2">
+                  <div
+                    className="h-full relative bg-[#0F172A] p-4 md:p-5 rounded-xl text-white overflow-hidden group
+                              border-t border-blue-500/20 shadow-md"
+                    onClick={() => window.location.href = '/team-matching'}
+                  >
+                    {/* Simplified Depth Effect */}
+                    <div className="absolute inset-0 overflow-hidden">
+                      <div className="absolute -right-10 -bottom-10 w-40 h-40 rounded-full bg-blue-500/10 blur-xl"></div>
+                                        </div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10 flex flex-col h-full">
+                      <div className="flex gap-3 items-center mb-3">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 flex items-center justify-center shadow-sm">
+                          <span className="text-lg">👥</span>
+                                      </div>
+                        <h3 className="text-xl font-bold text-white">
+                          Team <span className="text-blue-300">Matching</span>
+                        </h3>
+                              </div>
+
+                      <p className="text-blue-100 text-sm leading-relaxed mb-auto">
+                        Find perfect teammates with our AI-powered skill matching system.
+                      </p>
+                      
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="py-1 px-2 rounded-md bg-blue-500/20 text-blue-300 text-xs font-medium">AI Powered</span>
+                        <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500 transition-colors duration-300">
+                          <svg className="w-4 h-4 text-blue-400 group-hover:text-white transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M5 12h14M12 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                              </div>
+                            </div>
+                                      </div>
+                                </div>
+                              </div>
+                                  </div>
+                                </div>
+          </section>
+          
+          {/* Chat Rooms Feature - Optimized */}
+          <section className="py-2 md:py-3">
+            <div 
+              className="bg-[#1e1e1e] shadow-md rounded-2xl md:rounded-3xl p-3 md:p-6 overflow-hidden max-w-5xl mx-auto"
+            >
+              <div className="flex items-center gap-2 mb-3 border-b border-gray-700 pb-2">
+                <div className="flex space-x-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                                        </div>
+                <div className="text-white/70 text-xs">chat_rooms.tsx</div>
+                                    </div>
+              
+              {/* Simplified Code View */}
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="md:col-span-3">
+                  <div className="text-xs md:text-sm font-mono">
+                    <div className="flex">
+                      <div className="text-gray-500 w-6 md:w-8 flex-shrink-0 select-none">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="h-5 md:h-6">{i + 1}</div>
+                        ))}
+                              </div>
+
+                      <div className="flex-1 text-white overflow-x-auto">
+                        <div className="h-5 md:h-6 text-blue-400">import {"{}"} useState {"{}"} from &quot;react&quot;;</div>
+                        <div className="h-5 md:h-6">&nbsp;</div>
+                        <div className="h-5 md:h-6"><span className="text-purple-400">function</span> <span className="text-yellow-300">ChatRoom</span>({"{}"} roomId {"{"}) {"{"}</div>
+                        <div className="pl-4 h-5 md:h-6">const [message, setMessage] = useState(&quot;&quot;);</div>
+                        <div className="pl-4 h-5 md:h-6 text-green-600">{/* End-to-end encrypted messages */}</div>
+                        <div className="pl-4 h-5 md:h-6">return <span className="text-yellow-300">&lt;MessageList roomId={"{}"}roomId{"{"} /&gt;</span>;</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                {/* Feature Box - Chat Rooms */}
+                <div className="md:col-span-2">
+                  <div
+                    className="h-full relative bg-[#1A0B2E] p-4 md:p-5 rounded-xl text-white overflow-hidden group
+                              border-t border-purple-500/20 shadow-md"
+                    onClick={() => window.location.href = '/chat'}
+                  >
+                    {/* Simplified Depth Effect */}
+                    <div className="absolute inset-0 overflow-hidden">
+                      <div className="absolute -right-10 -bottom-10 w-40 h-40 rounded-full bg-purple-500/10 blur-xl"></div>
+                      </div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10 flex flex-col h-full">
+                      <div className="flex gap-3 items-center mb-3">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-purple-700 flex items-center justify-center shadow-sm">
+                          <span className="text-lg">💬</span>
+                    </div>
+                        <h3 className="text-xl font-bold text-white">
+                          Chat <span className="text-purple-300">Rooms</span>
+                        </h3>
+                  </div>
+
+                      <p className="text-purple-100 text-sm leading-relaxed mb-auto">
+                        Collaborate seamlessly with your team through dedicated chat rooms.
+                      </p>
+                      
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="py-1 px-2 rounded-md bg-purple-500/20 text-purple-300 text-xs font-medium">Encrypted</span>
+                        <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500 transition-colors duration-300">
+                          <svg className="w-4 h-4 text-purple-400 group-hover:text-white transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M5 12h14M12 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                  </div>
+                </div>
+            </div>
+        </div>
+      </div>
+                </div>
+              </div>
+          </section>
+          
+          {/* Analytics Feature - Optimized */}
+          <section className="py-2 md:py-3">
+            <div 
+              className="bg-[#1e1e1e] shadow-md rounded-2xl md:rounded-3xl p-3 md:p-6 overflow-hidden max-w-5xl mx-auto"
+            >
+              <div className="flex items-center gap-2 mb-3 border-b border-gray-700 pb-2">
+                <div className="flex space-x-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                  </div>
+                <div className="text-white/70 text-xs">analytics.tsx</div>
+                  </div>
+
+              {/* Simplified Code View */}
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="md:col-span-3">
+                  <div className="text-xs md:text-sm font-mono">
+                    <div className="flex">
+                      <div className="text-gray-500 w-6 md:w-8 flex-shrink-0 select-none">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="h-5 md:h-6">{i + 1}</div>
+                        ))}
+                        </div>
+                      
+                      <div className="flex-1 text-white overflow-x-auto">
+                        <div className="h-5 md:h-6 text-blue-400">import {"{}"} useMemo {"{}"} from &quot;react&quot;;</div>
+                        <div className="h-5 md:h-6">&nbsp;</div>
+                        <div className="h-5 md:h-6"><span className="text-purple-400">function</span> <span className="text-yellow-300">Analytics</span>({"{}"} hackathonId {"{"}) {"{"}</div>
+                        <div className="pl-4 h-5 md:h-6">const data = useAnalyticsData(hackathonId);</div>
+                        <div className="pl-4 h-5 md:h-6 text-green-600">{/* Real-time participation metrics */}</div>
+                        <div className="pl-4 h-5 md:h-6">return <span className="text-yellow-300">&lt;DashboardUI data={"{}"}data{"{"} /&gt;</span>;</div>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+
+                {/* Feature Box - Analytics */}
+                <div className="md:col-span-2">
+                  <div
+                    className="h-full relative bg-[#0B291A] p-4 md:p-5 rounded-xl text-white overflow-hidden group
+                              border-t border-emerald-500/20 shadow-md"
+                    onClick={() => window.location.href = '/analytics'}
+                  >
+                    {/* Simplified Depth Effect */}
+                    <div className="absolute inset-0 overflow-hidden">
+                      <div className="absolute -right-10 -bottom-10 w-40 h-40 rounded-full bg-emerald-500/10 blur-xl"></div>
+                        </div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10 flex flex-col h-full">
+                      <div className="flex gap-3 items-center mb-3">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-700 flex items-center justify-center shadow-sm">
+                          <span className="text-lg">📊</span>
+                          </div>
+                        <h3 className="text-xl font-bold text-white">
+                          Live <span className="text-emerald-300">Analytics</span>
+                        </h3>
+                        </div>
+                      
+                      <p className="text-emerald-100 text-sm leading-relaxed mb-auto">
+                        Track participation and team formation with real-time data.
+                      </p>
+                      
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="py-1 px-2 rounded-md bg-emerald-500/20 text-emerald-300 text-xs font-medium">Real-time</span>
+                        <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500 transition-colors duration-300">
+                          <svg className="w-4 h-4 text-emerald-400 group-hover:text-white transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M5 12h14M12 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                  </div>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+            </div>
+            
+      {/* FAQ Section */}
+      <div className="w-full px-4 py-4 md:py-8">
+        <div className="mx-auto max-w-7xl">
+          <section>
+            <div className="bg-white/90 backdrop-blur-md shadow-xl rounded-2xl p-3 md:p-6 border border-white/60 relative">
+              {/* Section Header */}
+              <div className="text-center mb-4 md:mb-10">
+                <span className="inline-block text-xs bg-gradient-to-r from-[#1e1894]/90 to-[#4361ee]/90 text-white font-medium uppercase tracking-wider px-2.5 py-0.5 rounded-full mb-2">
+                  Knowledge Base
+                </span>
+                <h2 className="text-xl md:text-3xl font-extrabold text-[#1e1894]">
+                  How Our Platform Stands Out
+                </h2>
+                <p className="text-gray-600 text-sm md:text-lg max-w-2xl mx-auto mt-2 md:mt-4">
+                  Discover what makes DevKstra the perfect platform for your hackathon journey.
+                </p>
+              </div>
+
+              {/* FAQ Items */}
+              <div className="space-y-2 md:space-y-4 max-w-4xl mx-auto">
+                {faqCategories.find(category => category.title === "How Our Hackathon Platform Stands Out")?.questions.map((faq) => (
+                  <div
+                    key={faq.id}
+                    className="bg-white/70 backdrop-blur-md rounded-lg p-2.5 md:p-4 shadow-sm border border-gray-100"
+                  >
+                    <FAQDropdown faq={faq} />
+                  </div>
+                ))}
+              </div>
+              
+              {/* Bottom Explore Button */}
+              <div className="mt-4 md:mt-10 text-center">
+                <Link 
+                  href="/faq"
+                  className="inline-flex items-center gap-1.5 px-3 md:px-6 py-2 md:py-3 bg-gradient-to-r from-[#1e1894] to-[#4361ee] text-white rounded-full text-xs md:text-base font-bold
+                           shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <span>Explore All FAQs</span>
+                  <svg className="w-3 h-3 md:w-4 md:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  )
 }

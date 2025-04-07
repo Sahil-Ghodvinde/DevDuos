@@ -4,6 +4,8 @@ import { useState } from "react"
 import Link from "next/link"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 // Social auth icons
 const GoogleIcon = () => (
@@ -57,18 +59,42 @@ export default function Login() {
     }))
   }
 
-  const handleSocialAuth = async (provider: 'google' | 'github') => {
-    console.log(`Authenticating with ${provider}`)
-  }
+  const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formData.identifier || !formData.password) {
-      alert('Please fill in all required fields')
-      return
+  // Update handleSocialAuth
+  const handleSocialAuth = async (provider: 'google' | 'github') => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+      
+      if (error) throw error;
+      console.log('OAuth initiated:', data);
+    } catch (error) {
+      console.error('Error signing in:', error);
+      alert('Error signing in. Please try again.');
     }
-    console.log('Login attempt with:', { ...formData, rememberMe })
-  }
+  };
+  
+  // Update handleSubmit
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.identifier,
+        password: formData.password
+      });
+      
+      if (error) throw error;
+      router.push('/auth-success?type=login');
+    } catch (error) {
+      console.error('Error signing in:', error);
+      alert('Invalid credentials. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
