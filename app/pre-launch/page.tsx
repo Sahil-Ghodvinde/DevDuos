@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import ContactForm from '@/components/contact-form';
+
 
 export default function PreLaunch() {
   return (
@@ -31,7 +31,7 @@ export default function PreLaunch() {
           className="mb-8"
         >
           <Image
-            src="/logo123.png"
+            src="/DevkstraLogo.png"
             alt="Devkstra Logo"
             width={150}
             height={150}
@@ -77,8 +77,8 @@ export default function PreLaunch() {
               className="w-16 h-16 mx-auto"
             >
               <Image
-                src="/logo123.png"
-                alt="Loading..."
+                src="/DevkstraLogo.png"
+                alt="Loading...."
                 width={64}
                 height={64}
                 className="mx-auto"
@@ -88,8 +88,7 @@ export default function PreLaunch() {
         </motion.div>
       </div>
 
-      {/* Contact Form */}
-      <ContactForm />
+      
     </div>
   );
 }
