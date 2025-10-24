@@ -122,10 +122,10 @@ export default function MediaPage() {
                     Get in Touch
                   </span>
                   <h2 className="text-3xl font-extrabold text-[#1e1894]">
-                    Let's Collaborate
+                    Let&apos;s Collaborate
                   </h2>
                   <p className="text-gray-600 text-lg max-w-2xl mx-auto mt-6">
-                    Have an idea for a video? Want to co-host a tech talk or sponsor content? We'd love to hear from you.
+                    Have an idea for a video? Want to co-host a tech talk or sponsor content? We&apos;d love to hear from you.
                   </p>
                 </div>
                 
